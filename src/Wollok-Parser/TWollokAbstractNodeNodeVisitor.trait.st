@@ -26,8 +26,8 @@ TWollokAbstractNodeNodeVisitor >> visitBlockExpression: aBlockExpression [
 ]
 
 { #category : #generated }
-TWollokAbstractNodeNodeVisitor >> visitBooleanLiteral: aBooleanLiteral [
-	^ self visitAbstractNode: aBooleanLiteral
+TWollokAbstractNodeNodeVisitor >> visitBooleanLiteral: aBooleanLiteralNode [
+	^ self visitAbstractNode: aBooleanLiteralNode
 ]
 
 { #category : #generated }

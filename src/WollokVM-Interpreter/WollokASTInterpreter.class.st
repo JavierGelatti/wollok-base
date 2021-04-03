@@ -40,13 +40,13 @@ WollokASTInterpreter >> interpretProgram: aFileNode [
 ]
 
 { #category : #testing }
-WollokASTInterpreter >> isFalse: aBoolean [
-	^ true
+WollokASTInterpreter >> isFalse: aWollokVMObject [
+	^ aWollokVMObject literalValue = false
 ]
 
 { #category : #testing }
-WollokASTInterpreter >> isTrue: aBoolean [
-	^ aBoolean
+WollokASTInterpreter >> isTrue: aWollokVMObject [
+	^ aWollokVMObject literalValue = true
 ]
 
 { #category : #bindings }
@@ -56,14 +56,38 @@ WollokASTInterpreter >> resolve: aString [
 ]
 
 { #category : #visitor }
-WollokASTInterpreter >> visitBinaryOperation: aBinaryOperationNode [ 
-	^ false
+WollokASTInterpreter >> visitBinaryOperation: aBinaryOperationNode [
+  | operator leftValue rightValue |
+
+	leftValue := (aBinaryOperationNode leftOperand acceptVisitor: self) literalValue.
+	rightValue := (aBinaryOperationNode rightOperand acceptVisitor: self) literalValue.
+	operator := aBinaryOperationNode operation value.
+	
+	operator = '&&' ifTrue: [ ^ self wollokBooleanFrom: leftValue & rightValue ].
+	operator = '||' ifTrue: [ ^ self wollokBooleanFrom: leftValue | rightValue ].
+
+	self notYetImplemented.
+]
+
+{ #category : #visit }
+WollokASTInterpreter >> visitBooleanLiteral: aBooleanLiteralNode [
+
+  ^ self wollokBooleanFrom: aBooleanLiteralNode booleanValue
 ]
 
 { #category : #visiting }
 WollokASTInterpreter >> visitNumberLiteral: aWollokNumberLiteralNode [ 
 
 	^ self wollokNumberFrom: aWollokNumberLiteralNode numberValue
+]
+
+{ #category : #'as yet unclassified' }
+WollokASTInterpreter >> wollokBooleanFrom: aBooleanValue [
+
+	^ WollokVMLiteral new
+		wollokClass: (self resolve: 'wollok.lang.Boolean');
+		literalValue: aBooleanValue;
+		yourself
 ]
 
 { #category : #literals }

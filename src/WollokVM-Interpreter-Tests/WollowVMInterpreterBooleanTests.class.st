@@ -27,7 +27,8 @@ WollowVMInterpreterBooleanTests >> testLiteralFalseReturnsCorrectValue [
 	| returnValue |
 	
 	returnValue := self interpretExpression: 'false'.
-	self assert: (interpreter isFalse: returnValue)
+	self assert: (interpreter isFalse: returnValue).
+	self deny: (interpreter isTrue: returnValue).
 ]
 
 { #category : #tests }
@@ -35,7 +36,8 @@ WollowVMInterpreterBooleanTests >> testLiteralTrueReturnsCorrectValue [
 
 	| returnValue |
 	returnValue := self interpretExpression: 'true'.
-	self assert: (interpreter isTrue: returnValue)
+	self assert: (interpreter isTrue: returnValue).
+	self deny: (interpreter isFalse: returnValue)
 ]
 
 { #category : #tests }
