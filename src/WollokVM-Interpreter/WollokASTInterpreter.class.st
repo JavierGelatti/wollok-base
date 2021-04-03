@@ -65,6 +65,14 @@ WollokASTInterpreter >> visitBinaryOperation: aBinaryOperationNode [
 	
 	operator = '&&' ifTrue: [ ^ self wollokBooleanFrom: leftValue & rightValue ].
 	operator = '||' ifTrue: [ ^ self wollokBooleanFrom: leftValue | rightValue ].
+	
+	operator = '>' ifTrue: [ ^ self wollokBooleanFrom: leftValue > rightValue ].
+	operator = '<' ifTrue: [ ^ self wollokBooleanFrom: leftValue < rightValue ].
+	operator = '+' ifTrue: [ ^ self wollokNumberFrom: leftValue + rightValue ].
+	operator = '-' ifTrue: [ ^ self wollokNumberFrom: leftValue - rightValue ].
+	operator = '/' ifTrue: [ ^ self wollokNumberFrom: leftValue / rightValue ].
+	operator = '%' ifTrue: [ ^ self wollokNumberFrom: leftValue % rightValue ].
+	operator = '*' ifTrue: [ ^ self wollokNumberFrom: leftValue * rightValue ].
 
 	self notYetImplemented.
 ]
@@ -76,18 +84,43 @@ WollokASTInterpreter >> visitBooleanLiteral: aBooleanLiteralNode [
 ]
 
 { #category : #visiting }
+WollokASTInterpreter >> visitMemberFeatureCall: aMemberFeatureCallNode [
+	
+	| receiver argument |
+	
+	receiver := (aMemberFeatureCallNode receiver acceptVisitor: self) literalValue.
+	argument := 3.
+	
+	^ self wollokNumberFrom: (receiver truncateTo: 1 / (10 ** argument)) asFloat
+]
+
+{ #category : #visiting }
 WollokASTInterpreter >> visitNumberLiteral: aWollokNumberLiteralNode [ 
 
 	^ self wollokNumberFrom: aWollokNumberLiteralNode numberValue
 ]
 
+{ #category : #visiting }
+WollokASTInterpreter >> visitUnaryOperation: aUnaryOperationNode [ 
+	
+	| operand operator |
+	operand := (aUnaryOperationNode rightOperand acceptVisitor: self) literalValue.
+	
+	operator := aUnaryOperationNode operation value.
+	
+	operator = '+' ifTrue: [ ^ self wollokNumberFrom: operand ].
+	operator = '-' ifTrue: [ ^ self wollokNumberFrom: operand negated ].
+	
+  self notYetImplemented
+]
+
 { #category : #'as yet unclassified' }
-WollokASTInterpreter >> wollokBooleanFrom: aBooleanValue [
+WollokASTInterpreter >> wollokBooleanFrom: aSmalltalkBoolean [
 
 	^ WollokVMLiteral new
-		wollokClass: (self resolve: 'wollok.lang.Boolean');
-		literalValue: aBooleanValue;
-		yourself
+		   wollokClass: (self resolve: 'wollok.lang.Boolean');
+		   literalValue: aSmalltalkBoolean;
+		   yourself
 ]
 
 { #category : #literals }

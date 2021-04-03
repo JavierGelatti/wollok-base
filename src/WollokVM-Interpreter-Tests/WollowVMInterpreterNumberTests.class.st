@@ -101,7 +101,8 @@ WollowVMInterpreterNumberTests >> testLiteralNegativeNumberIsAWollokNumber [
 
 	maybeANumber := self interpretExpression: '-2'.
 
-	self assert: maybeANumber wollokClassName equals: 'wollok.lang.Number'
+	self assert: maybeANumber wollokClassName equals: 'wollok.lang.Number'.
+	self assert: maybeANumber literalValue equals: -2
 ]
 
 { #category : #'tests - constants' }
@@ -109,7 +110,7 @@ WollowVMInterpreterNumberTests >> testLiteralNumberIsAWollokNumber [
 
 	| maybeANumber |
 
-	maybeANumber := self interpretExpression: '1'.
+	maybeANumber := self interpretExpression: '2'.
 
 	self assert: maybeANumber wollokClassName equals: 'wollok.lang.Number'
 ]
@@ -122,6 +123,17 @@ WollowVMInterpreterNumberTests >> testLiteralNumberIsCorrectNumber [
 	maybeANumber := self interpretExpression: '1'.
 
 	self assert: maybeANumber literalValue equals: 1
+]
+
+{ #category : #'tests - constants' }
+WollowVMInterpreterNumberTests >> testLiteralPositiveNumberIsAWollokNumber [
+
+	| maybeANumber |
+
+	maybeANumber := self interpretExpression: '+2'.
+
+	self assert: maybeANumber wollokClassName equals: 'wollok.lang.Number'.
+	self assert: maybeANumber literalValue equals: 2
 ]
 
 { #category : #'tests - operations' }
