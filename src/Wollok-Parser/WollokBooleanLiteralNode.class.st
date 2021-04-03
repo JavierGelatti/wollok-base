@@ -8,8 +8,13 @@ Class {
 }
 
 { #category : #generated }
-WollokBooleanLiteralNode >> acceptVisitor: anAbstractNodeVisitor [
-	^ anAbstractNodeVisitor visitBooleanLiteral: self
+WollokBooleanLiteralNode >> acceptVisitor: anNodeVisitor [
+	^ self booleanValue
+]
+
+{ #category : #converting }
+WollokBooleanLiteralNode >> booleanValue [
+	^ self source = 'true'
 ]
 
 { #category : #generated }

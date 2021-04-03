@@ -39,10 +39,25 @@ WollokASTInterpreter >> interpretProgram: aFileNode [
 	^ lastValue	
 ]
 
+{ #category : #testing }
+WollokASTInterpreter >> isFalse: aBoolean [
+	^ true
+]
+
+{ #category : #testing }
+WollokASTInterpreter >> isTrue: aBoolean [
+	^ aBoolean
+]
+
 { #category : #bindings }
 WollokASTInterpreter >> resolve: aString [ 
 	
 	^ bindings at: aString
+]
+
+{ #category : #visitor }
+WollokASTInterpreter >> visitBinaryOperation: aBinaryOperationNode [ 
+	^ false
 ]
 
 { #category : #visiting }
