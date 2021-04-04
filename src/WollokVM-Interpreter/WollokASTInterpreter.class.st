@@ -105,14 +105,11 @@ WollokASTInterpreter >> visitNumberLiteral: aWollokNumberLiteralNode [
 WollokASTInterpreter >> visitUnaryOperation: aUnaryOperationNode [ 
 	
 	| operand operator |
-	operand := (aUnaryOperationNode rightOperand acceptVisitor: self) literalValue.
+	operand := aUnaryOperationNode rightOperand acceptVisitor: self.
 	
 	operator := aUnaryOperationNode operation value.
 	
-	operator = '+' ifTrue: [ ^ self wollokNumberFrom: operand ].
-	operator = '-' ifTrue: [ ^ self wollokNumberFrom: operand negated ].
-	
-  self notYetImplemented
+	^ self send: ('@', operator) asSymbol to: operand with: { }
 ]
 
 { #category : #literals }

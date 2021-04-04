@@ -73,6 +73,12 @@ WollokReducedLoader >> loadInto: anInterpreter [
 			#* -> [ :interpreter :receiver :arguments |
 			   interpreter wollokNumberFrom: receiver literalValue * arguments first literalValue
 		  ].
+			#@- -> [ :interpreter :receiver :arguments |
+			   interpreter wollokNumberFrom: receiver literalValue negated
+		  ].
+			#@+ -> [ :interpreter :receiver :arguments |
+			   receiver
+		  ].
 		} 
 		in: anInterpreter.
 	
