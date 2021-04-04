@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'name',
-		'ast'
+		'ast',
+		'methodDictionary'
 	],
 	#category : #'WollokVM-Interpreter'
 }
@@ -23,6 +24,16 @@ WollokVMClass >> ast [
 { #category : #accessing }
 WollokVMClass >> ast: anObject [
 	ast := anObject
+]
+
+{ #category : #'as yet unclassified' }
+WollokVMClass >> methodDictionary: aMethodDictionary [
+	methodDictionary := aMethodDictionary
+]
+
+{ #category : #'as yet unclassified' }
+WollokVMClass >> methodFor: aSelector ifNone: aBlock [
+	^methodDictionary at: aSelector ifAbsent: aBlock.
 ]
 
 { #category : #accessing }

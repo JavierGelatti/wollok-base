@@ -6,6 +6,11 @@ Class {
 
 { #category : #'as yet unclassified' }
 WollokReducedLoader >> addBindingOfClass: aName fromString: aString in: anInterpreter [
+	self addBindingOfClass: aName fromString: aString withMethods: {} asDictionary in: anInterpreter 
+]
+
+{ #category : #'as yet unclassified' }
+WollokReducedLoader >> addBindingOfClass: aName fromString: aString withMethods: methodsDict in: anInterpreter [
 
 	| anAST aWollokClass |
 	
@@ -15,6 +20,7 @@ WollokReducedLoader >> addBindingOfClass: aName fromString: aString in: anInterp
 	aWollokClass := WollokVMClass new
 		name: aName;
 		ast: anAST;
+		methodDictionary: methodsDict;
 		yourself.
 	
 	anInterpreter addBinding: aName value: aWollokClass.
@@ -22,15 +28,35 @@ WollokReducedLoader >> addBindingOfClass: aName fromString: aString in: anInterp
 
 { #category : #'as yet unclassified' }
 WollokReducedLoader >> addBindingOfClass: aName of: selector in: anInterpreter [
+   self addBindingOfClass: aName of: selector withMethods: {} in: anInterpreter.
+]
 
-	self addBindingOfClass: aName fromString: (self perform: selector) in: anInterpreter 
+{ #category : #'as yet unclassified' }
+WollokReducedLoader >> addBindingOfClass: aName of: selector withMethods: methodList in: anInterpreter [
+
+	self addBindingOfClass: aName fromString: (self perform: selector) withMethods: methodList asDictionary in: anInterpreter 
 ]
 
 { #category : #'as yet unclassified' }
 WollokReducedLoader >> loadInto: anInterpreter [
 
-	self addBindingOfClass: 'wollok.lang.Object' of: #wollokLangObject in: anInterpreter.
-	self addBindingOfClass: 'wollok.lang.Number' of: #wollokLangNumber in: anInterpreter.	
+	self addBindingOfClass: 'wollok.lang.Object' 
+		of: #wollokLangObject 
+		withMethods: {}
+		in: anInterpreter.
+	self 
+		addBindingOfClass: 'wollok.lang.Number' 
+		of: #wollokLangNumber 
+		withMethods: {
+		  #invert -> [ :interpreter :receiver :arguments |
+			   interpreter wollokNumberFrom: receiver literalValue negated
+		  ].
+	     #truncate -> [ :interpreter :receiver :arguments |
+			   interpreter wollokNumberFrom: (receiver literalValue truncateTo: 1 / (10 ** arguments first literalValue)) asFloat
+		  ]
+		} 
+		in: anInterpreter.	
+		
 	self addBindingOfClass: 'wollok.lang.Boolean' of: #wollokLangBoolean in: anInterpreter.
 
 	self addBindingOfClass: 'wollok.lang.Collection' of: #wollokLangCollection in: anInterpreter.	

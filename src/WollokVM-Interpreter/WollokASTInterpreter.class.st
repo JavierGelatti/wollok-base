@@ -85,19 +85,19 @@ WollokASTInterpreter >> visitBooleanLiteral: aBooleanLiteralNode [
 
 { #category : #visiting }
 WollokASTInterpreter >> visitMemberFeatureCall: aMemberFeatureCallNode [
-	| receiver arguments selector |
+	| receiver arguments selector receiverClass method |
 	
-	receiver := (aMemberFeatureCallNode receiver acceptVisitor: self) literalValue.
+	receiver := aMemberFeatureCallNode receiver acceptVisitor: self.
+	receiverClass := receiver wollokClass.
 	arguments := aMemberFeatureCallNode arguments collect: [ :argument |
-		( argument acceptVisitor: self) literalValue.
+		argument acceptVisitor: self.
 	].
 
-   selector := aMemberFeatureCallNode feature value.
+   selector := aMemberFeatureCallNode feature value asSymbol.
 
-	selector = 'invert' ifTrue: [ ^ self wollokNumberFrom: receiver negated  ].
-	selector = 'truncate' ifTrue: [ ^ self wollokNumberFrom: (receiver truncateTo: 1 / (10 ** arguments first)) asFloat ].
-
-	self notYetImplemented.
+   method := receiverClass methodFor: selector ifNone: [ self notYetImplemented ].
+   
+   ^method value: self value: receiver value: arguments.
 ]
 
 { #category : #visiting }
