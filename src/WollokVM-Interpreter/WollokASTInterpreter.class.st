@@ -55,7 +55,7 @@ WollokASTInterpreter >> resolve: aString [
 	^ bindings at: aString
 ]
 
-{ #category : #visitor }
+{ #category : #visiting }
 WollokASTInterpreter >> visitBinaryOperation: aBinaryOperationNode [
   | operator leftValue rightValue |
 
@@ -77,7 +77,7 @@ WollokASTInterpreter >> visitBinaryOperation: aBinaryOperationNode [
 	self notYetImplemented.
 ]
 
-{ #category : #visit }
+{ #category : #visiting }
 WollokASTInterpreter >> visitBooleanLiteral: aBooleanLiteralNode [
 
   ^ self wollokBooleanFrom: aBooleanLiteralNode booleanValue
@@ -114,7 +114,7 @@ WollokASTInterpreter >> visitUnaryOperation: aUnaryOperationNode [
   self notYetImplemented
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #literals }
 WollokASTInterpreter >> wollokBooleanFrom: aSmalltalkBoolean [
 
 	^ WollokVMLiteral new
