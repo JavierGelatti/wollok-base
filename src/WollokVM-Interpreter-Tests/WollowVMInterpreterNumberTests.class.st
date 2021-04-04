@@ -74,6 +74,16 @@ WollowVMInterpreterNumberTests >> testDivisionOfTwoNumbersWithDecimalsIsAWollokN
 	self assert: maybeANumber wollokClassName equals: 'wollok.lang.Number'
 ]
 
+{ #category : #'tests - operations' }
+WollowVMInterpreterNumberTests >> testInvertOfAPostiveReturnsTheNegativeVersion [
+	| returnValue |
+	returnValue := self interpretExpression: '4.invert()'.
+	self assert: returnValue literalValue equals: -4.
+	
+	returnValue := self interpretExpression: '1.23.invert()'.
+	self assert: returnValue literalValue equals: -1.23.
+]
+
 { #category : #'tests - constants' }
 WollowVMInterpreterNumberTests >> testLiteralDecimalNumberIsAWollokNumber [
 
