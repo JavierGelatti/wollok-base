@@ -101,6 +101,11 @@ WollokASTInterpreter >> visitNumberLiteral: aWollokNumberLiteralNode [
 	^ self wollokNumberFrom: aWollokNumberLiteralNode numberValue
 ]
 
+{ #category : #'as yet unclassified' }
+WollokASTInterpreter >> visitStringLiteral: aStringLiteralNode [ 
+	^ self wollokStringFrom: aStringLiteralNode stringValue
+]
+
 { #category : #visiting }
 WollokASTInterpreter >> visitUnaryOperation: aUnaryOperationNode [ 
 	
@@ -128,4 +133,13 @@ WollokASTInterpreter >> wollokNumberFrom: anInteger [
 		wollokClass: (self resolve: 'wollok.lang.Number');
 		literalValue: anInteger;
 		yourself
+]
+
+{ #category : #'as yet unclassified' }
+WollokASTInterpreter >> wollokStringFrom: aSmalltalkString [ 
+	
+	^ WollokVMLiteral new
+		   wollokClass: (self resolve: 'wollok.lang.String');
+		   literalValue: aSmalltalkString;
+		   yourself
 ]

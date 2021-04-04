@@ -12,6 +12,13 @@ WollokStringLiteralNode >> acceptVisitor: anAbstractNodeVisitor [
 	^ anAbstractNodeVisitor visitStringLiteral: self
 ]
 
+{ #category : #'as yet unclassified' }
+WollokStringLiteralNode >> stringValue [
+	
+	^ value value allButFirst allButLast.
+
+]
+
 { #category : #generated }
 WollokStringLiteralNode >> tokenVariables [
 	^ #(#value)

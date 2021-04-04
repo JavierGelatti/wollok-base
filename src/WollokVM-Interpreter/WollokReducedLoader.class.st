@@ -99,7 +99,16 @@ WollokReducedLoader >> loadInto: anInterpreter [
 	self addBindingOfClass: 'wollok.lang.Set' of: #wollokLangSet in: anInterpreter.
 	self addBindingOfClass: 'wollok.lang.List' of: #wollokLangList in: anInterpreter.
 
-	self addBindingOfClass: 'wollok.lang.String' of: #wollokLangString in: anInterpreter.
+	self
+		addBindingOfClass: 'wollok.lang.String'
+		of: #wollokLangString
+		withMethods: {
+		  #+ -> [ :interpreter :receiver :arguments |
+			   interpreter wollokStringFrom: receiver literalValue, arguments first literalValue
+		  ].
+		}
+		in: anInterpreter.
+
 	self addBindingOfClass: 'wollok.lang.Exception' of: #wollokLangException in: anInterpreter.							
 ]
 
