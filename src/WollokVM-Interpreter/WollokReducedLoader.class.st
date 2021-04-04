@@ -46,37 +46,37 @@ WollokReducedLoader >> loadInto: anInterpreter [
 		addBindingOfClass: 'wollok.lang.Number' 
 		of: #wollokLangNumber 
 		withMethods: {
-		  #invert -> [ :interpreter :receiver :arguments |
-			   interpreter wollokNumberFrom: receiver literalValue negated
+		  #invert -> [ :receiver |
+			   anInterpreter wollokNumberFrom: receiver literalValue negated
 		  ].
-	     #truncate -> [ :interpreter :receiver :arguments |
-			   interpreter wollokNumberFrom: (receiver literalValue truncateTo: 1 / (10 ** arguments first literalValue)) asFloat
+	     #truncate -> [ :receiver :numberOfDecimals |
+			   anInterpreter wollokNumberFrom: (receiver literalValue truncateTo: 1 / (10 ** numberOfDecimals literalValue)) asFloat
 		  ].
-	    #> -> [ :interpreter :receiver :arguments |
-			   interpreter wollokBooleanFrom: receiver literalValue > arguments first literalValue
+	    #> -> [ :receiver :anotherNumber |
+			   anInterpreter wollokBooleanFrom: receiver literalValue > anotherNumber literalValue
 		  ].
-		  #< -> [ :interpreter :receiver :arguments |
-			   interpreter wollokBooleanFrom: receiver literalValue < arguments first literalValue
+		  #< -> [ :receiver :anotherNumber |
+			   anInterpreter wollokBooleanFrom: receiver literalValue < anotherNumber literalValue
 		  ].
-			#+ -> [ :interpreter :receiver :arguments |
-			   interpreter wollokNumberFrom: receiver literalValue + arguments first literalValue
+			#+ -> [ :receiver :anotherNumber |
+			   anInterpreter wollokNumberFrom: receiver literalValue + anotherNumber literalValue
 		  ].
-			#- -> [ :interpreter :receiver :arguments |
-			   interpreter wollokNumberFrom: receiver literalValue - arguments first literalValue
+			#- -> [ :receiver :anotherNumber |
+			   anInterpreter wollokNumberFrom: receiver literalValue - anotherNumber literalValue
 		  ].
-			#/ -> [ :interpreter :receiver :arguments |
-			   interpreter wollokNumberFrom: receiver literalValue / arguments first literalValue
+			#/ -> [ :receiver :anotherNumber |
+			   anInterpreter wollokNumberFrom: receiver literalValue / anotherNumber literalValue
 		  ].
-			#% -> [ :interpreter :receiver :arguments |
-			   interpreter wollokNumberFrom: receiver literalValue % arguments first literalValue
+			#% -> [ :receiver :anotherNumber |
+			   anInterpreter wollokNumberFrom: receiver literalValue % anotherNumber literalValue
 		  ].
-			#* -> [ :interpreter :receiver :arguments |
-			   interpreter wollokNumberFrom: receiver literalValue * arguments first literalValue
+			#* -> [ :receiver :anotherNumber |
+			   anInterpreter wollokNumberFrom: receiver literalValue * anotherNumber literalValue
 		  ].
-			#@- -> [ :interpreter :receiver :arguments |
-			   interpreter wollokNumberFrom: receiver literalValue negated
+			#@- -> [ :receiver |
+			   anInterpreter wollokNumberFrom: receiver literalValue negated
 		  ].
-			#@+ -> [ :interpreter :receiver :arguments |
+			#@+ -> [ :receiver |
 			   receiver
 		  ].
 		} 
@@ -86,11 +86,11 @@ WollokReducedLoader >> loadInto: anInterpreter [
 		addBindingOfClass: 'wollok.lang.Boolean'
 		of: #wollokLangBoolean
 		withMethods: {
-		  #&& -> [ :interpreter :receiver :arguments |
-			   interpreter wollokBooleanFrom: receiver literalValue & arguments first literalValue
+		  #&& -> [ :receiver :anotherBoolean |
+			   anInterpreter wollokBooleanFrom: receiver literalValue & anotherBoolean literalValue
 		  ].
-		  #|| -> [ :interpreter :receiver :arguments |
-			   interpreter wollokBooleanFrom: receiver literalValue | arguments first literalValue
+		  #|| -> [ :receiver :anotherBoolean |
+			   anInterpreter wollokBooleanFrom: receiver literalValue | anotherBoolean literalValue
 		  ].
 		}
 		in: anInterpreter.
@@ -103,8 +103,8 @@ WollokReducedLoader >> loadInto: anInterpreter [
 		addBindingOfClass: 'wollok.lang.String'
 		of: #wollokLangString
 		withMethods: {
-		  #+ -> [ :interpreter :receiver :arguments |
-			   interpreter wollokStringFrom: receiver literalValue, arguments first literalValue
+		  #+ -> [ :receiver :anotherString |
+			   anInterpreter wollokStringFrom: receiver literalValue, anotherString literalValue
 		  ].
 		}
 		in: anInterpreter.
