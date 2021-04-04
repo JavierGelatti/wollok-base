@@ -101,7 +101,7 @@ WollokASTInterpreter >> visitNumberLiteral: aWollokNumberLiteralNode [
 	^ self wollokNumberFrom: aWollokNumberLiteralNode numberValue
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #visiting }
 WollokASTInterpreter >> visitStringLiteral: aStringLiteralNode [ 
 	^ self wollokStringFrom: aStringLiteralNode stringValue
 ]
@@ -135,7 +135,7 @@ WollokASTInterpreter >> wollokNumberFrom: anInteger [
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #literals }
 WollokASTInterpreter >> wollokStringFrom: aSmalltalkString [ 
 	
 	^ WollokVMLiteral new

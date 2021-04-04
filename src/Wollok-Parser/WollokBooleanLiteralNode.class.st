@@ -12,7 +12,7 @@ WollokBooleanLiteralNode >> acceptVisitor: anAbstractNodeVisitor [
   ^ anAbstractNodeVisitor visitBooleanLiteral: self
 ]
 
-{ #category : #converting }
+{ #category : #accessing }
 WollokBooleanLiteralNode >> booleanValue [
 	^ self source = 'true'
 ]

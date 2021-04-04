@@ -26,12 +26,12 @@ WollokVMClass >> ast: anObject [
 	ast := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 WollokVMClass >> methodDictionary: aMethodDictionary [
 	methodDictionary := aMethodDictionary
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'message execution' }
 WollokVMClass >> methodFor: aSelector ifNone: aBlock [
 	^methodDictionary at: aSelector ifAbsent: aBlock.
 ]
