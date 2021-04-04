@@ -89,7 +89,7 @@ WollokASTInterpreter >> visitMemberFeatureCall: aMemberFeatureCallNode [
 	| receiver argument |
 	
 	receiver := (aMemberFeatureCallNode receiver acceptVisitor: self) literalValue.
-	argument := 3.
+	argument := (aMemberFeatureCallNode arguments first acceptVisitor: self) literalValue.
 	
 	^ self wollokNumberFrom: (receiver truncateTo: 1 / (10 ** argument)) asFloat
 ]

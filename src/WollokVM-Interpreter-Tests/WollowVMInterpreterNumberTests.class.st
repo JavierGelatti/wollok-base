@@ -211,4 +211,10 @@ WollowVMInterpreterNumberTests >> testTruncateReturnsCorrectValue [
 	
 	returnValue := self interpretExpression: '5.truncate(3)'.
 	self assert: returnValue literalValue equals: 5.
+	
+	returnValue := self interpretExpression: '1.223445.truncate(4)'.
+	self assert: returnValue literalValue equals: 1.2234.
+	
+	returnValue := self interpretExpression: '14.6165.truncate(2)'.
+	self assert: returnValue literalValue equals: 14.61.
 ]
