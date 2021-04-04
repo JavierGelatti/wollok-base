@@ -40,10 +40,8 @@ WollokReducedLoader >> addBindingOfClass: aName of: selector withMethods: method
 { #category : #'as yet unclassified' }
 WollokReducedLoader >> loadInto: anInterpreter [
 
-	self addBindingOfClass: 'wollok.lang.Object' 
-		of: #wollokLangObject 
-		withMethods: {}
-		in: anInterpreter.
+	self addBindingOfClass: 'wollok.lang.Object' of: #wollokLangObject in: anInterpreter.
+	
 	self 
 		addBindingOfClass: 'wollok.lang.Number' 
 		of: #wollokLangNumber 
@@ -53,11 +51,43 @@ WollokReducedLoader >> loadInto: anInterpreter [
 		  ].
 	     #truncate -> [ :interpreter :receiver :arguments |
 			   interpreter wollokNumberFrom: (receiver literalValue truncateTo: 1 / (10 ** arguments first literalValue)) asFloat
-		  ]
+		  ].
+	    #> -> [ :interpreter :receiver :arguments |
+			   interpreter wollokBooleanFrom: receiver literalValue > arguments first literalValue
+		  ].
+		  #< -> [ :interpreter :receiver :arguments |
+			   interpreter wollokBooleanFrom: receiver literalValue < arguments first literalValue
+		  ].
+			#+ -> [ :interpreter :receiver :arguments |
+			   interpreter wollokNumberFrom: receiver literalValue + arguments first literalValue
+		  ].
+			#- -> [ :interpreter :receiver :arguments |
+			   interpreter wollokNumberFrom: receiver literalValue - arguments first literalValue
+		  ].
+			#/ -> [ :interpreter :receiver :arguments |
+			   interpreter wollokNumberFrom: receiver literalValue / arguments first literalValue
+		  ].
+			#% -> [ :interpreter :receiver :arguments |
+			   interpreter wollokNumberFrom: receiver literalValue % arguments first literalValue
+		  ].
+			#* -> [ :interpreter :receiver :arguments |
+			   interpreter wollokNumberFrom: receiver literalValue * arguments first literalValue
+		  ].
 		} 
-		in: anInterpreter.	
-		
-	self addBindingOfClass: 'wollok.lang.Boolean' of: #wollokLangBoolean in: anInterpreter.
+		in: anInterpreter.
+	
+	self
+		addBindingOfClass: 'wollok.lang.Boolean'
+		of: #wollokLangBoolean
+		withMethods: {
+		  #&& -> [ :interpreter :receiver :arguments |
+			   interpreter wollokBooleanFrom: receiver literalValue & arguments first literalValue
+		  ].
+		  #|| -> [ :interpreter :receiver :arguments |
+			   interpreter wollokBooleanFrom: receiver literalValue | arguments first literalValue
+		  ].
+		}
+		in: anInterpreter.
 
 	self addBindingOfClass: 'wollok.lang.Collection' of: #wollokLangCollection in: anInterpreter.	
 	self addBindingOfClass: 'wollok.lang.Set' of: #wollokLangSet in: anInterpreter.

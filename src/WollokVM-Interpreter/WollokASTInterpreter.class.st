@@ -56,25 +56,25 @@ WollokASTInterpreter >> resolve: aString [
 ]
 
 { #category : #visiting }
+WollokASTInterpreter >> send: selector to: receiver with: arguments [
+	| method |
+	
+	method := receiver wollokClass
+		methodFor: selector
+		ifNone: [ self notYetImplemented ].
+		
+	^ method value: self value: receiver value: arguments
+]
+
+{ #category : #visiting }
 WollokASTInterpreter >> visitBinaryOperation: aBinaryOperationNode [
   | operator leftValue rightValue |
 
-	leftValue := (aBinaryOperationNode leftOperand acceptVisitor: self) literalValue.
-	rightValue := (aBinaryOperationNode rightOperand acceptVisitor: self) literalValue.
-	operator := aBinaryOperationNode operation value.
+	leftValue := (aBinaryOperationNode leftOperand acceptVisitor: self).
+	rightValue := (aBinaryOperationNode rightOperand acceptVisitor: self).
+	operator := aBinaryOperationNode operation value asSymbol.
 	
-	operator = '&&' ifTrue: [ ^ self wollokBooleanFrom: leftValue & rightValue ].
-	operator = '||' ifTrue: [ ^ self wollokBooleanFrom: leftValue | rightValue ].
-	
-	operator = '>' ifTrue: [ ^ self wollokBooleanFrom: leftValue > rightValue ].
-	operator = '<' ifTrue: [ ^ self wollokBooleanFrom: leftValue < rightValue ].
-	operator = '+' ifTrue: [ ^ self wollokNumberFrom: leftValue + rightValue ].
-	operator = '-' ifTrue: [ ^ self wollokNumberFrom: leftValue - rightValue ].
-	operator = '/' ifTrue: [ ^ self wollokNumberFrom: leftValue / rightValue ].
-	operator = '%' ifTrue: [ ^ self wollokNumberFrom: leftValue % rightValue ].
-	operator = '*' ifTrue: [ ^ self wollokNumberFrom: leftValue * rightValue ].
-
-	self notYetImplemented.
+	^ self send: operator to: leftValue with: { rightValue }
 ]
 
 { #category : #visiting }
@@ -85,19 +85,14 @@ WollokASTInterpreter >> visitBooleanLiteral: aBooleanLiteralNode [
 
 { #category : #visiting }
 WollokASTInterpreter >> visitMemberFeatureCall: aMemberFeatureCallNode [
-	| receiver arguments selector receiverClass method |
+
+	| receiver arguments selector |
 	
 	receiver := aMemberFeatureCallNode receiver acceptVisitor: self.
-	receiverClass := receiver wollokClass.
-	arguments := aMemberFeatureCallNode arguments collect: [ :argument |
-		argument acceptVisitor: self.
-	].
-
-   selector := aMemberFeatureCallNode feature value asSymbol.
-
-   method := receiverClass methodFor: selector ifNone: [ self notYetImplemented ].
-   
-   ^method value: self value: receiver value: arguments.
+	arguments := aMemberFeatureCallNode arguments collect: [ :argument | argument acceptVisitor: self ].
+	selector := aMemberFeatureCallNode feature value asSymbol.
+	
+	^ self send: selector to: receiver with: arguments
 ]
 
 { #category : #visiting }
