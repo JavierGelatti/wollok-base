@@ -12,16 +12,19 @@ WollokReducedLoader >> addBindingOfClass: aName fromString: aString in: anInterp
 { #category : #'as yet unclassified' }
 WollokReducedLoader >> addBindingOfClass: aName fromString: aString withMethods: methodsDict in: anInterpreter [
 
-	| anAST aWollokClass |
+	| anAST aWollokClass aClassDeclarationInterpreter |
 	
 	anAST := WollokParser parse: aString.
 	anAST attributeNamed: #source put: aString.
+	aClassDeclarationInterpreter := ClassDeclarationInterpreter new.
 
-	aWollokClass := WollokVMClass new
+   aWollokClass := anAST acceptVisitor: aClassDeclarationInterpreter.
+   aWollokClass name: aName ; ast: anAST; mergeMethods: methodsDict.
+	"aWollokClass := WollokVMClass new
 		name: aName;
 		ast: anAST;
 		methodDictionary: methodsDict;
-		yourself.
+		yourself."
 	
 	anInterpreter addBinding: aName value: aWollokClass.
 ]
@@ -46,37 +49,37 @@ WollokReducedLoader >> loadInto: anInterpreter [
 		addBindingOfClass: 'wollok.lang.Number' 
 		of: #wollokLangNumber 
 		withMethods: {
-		  #invert -> [ :receiver |
+		  #'invert/0' -> [ :interpreter :receiver |
 			   anInterpreter wollokNumberFrom: receiver literalValue negated
 		  ].
-	     #truncate -> [ :receiver :numberOfDecimals |
+	     #'truncate/1' -> [ :interpreter :receiver :numberOfDecimals |
 			   anInterpreter wollokNumberFrom: (receiver literalValue truncateTo: 1 / (10 ** numberOfDecimals literalValue)) asFloat
 		  ].
-	    #> -> [ :receiver :anotherNumber |
+        #'>/1' -> [ :interpreter :receiver :anotherNumber |
 			   anInterpreter wollokBooleanFrom: receiver literalValue > anotherNumber literalValue
 		  ].
-		  #< -> [ :receiver :anotherNumber |
+		  #'</1' -> [ :interpreter :receiver :anotherNumber |
 			   anInterpreter wollokBooleanFrom: receiver literalValue < anotherNumber literalValue
 		  ].
-			#+ -> [ :receiver :anotherNumber |
+			#'+/1' -> [ :interpreter :receiver :anotherNumber |
 			   anInterpreter wollokNumberFrom: receiver literalValue + anotherNumber literalValue
 		  ].
-			#- -> [ :receiver :anotherNumber |
+			#'-/1' -> [ :interpreter :receiver :anotherNumber |
 			   anInterpreter wollokNumberFrom: receiver literalValue - anotherNumber literalValue
 		  ].
-			#/ -> [ :receiver :anotherNumber |
+			#'//1' -> [ :interpreter :receiver :anotherNumber |
 			   anInterpreter wollokNumberFrom: receiver literalValue / anotherNumber literalValue
 		  ].
-			#% -> [ :receiver :anotherNumber |
+			#'%/1' -> [ :interpreter :receiver :anotherNumber |
 			   anInterpreter wollokNumberFrom: receiver literalValue % anotherNumber literalValue
 		  ].
-			#* -> [ :receiver :anotherNumber |
+			#'*/1' -> [ :interpreter :receiver :anotherNumber |
 			   anInterpreter wollokNumberFrom: receiver literalValue * anotherNumber literalValue
 		  ].
-			#@- -> [ :receiver |
+			#'@-/0' -> [ :interpreter :receiver |
 			   anInterpreter wollokNumberFrom: receiver literalValue negated
 		  ].
-			#@+ -> [ :receiver |
+			#'@+/0' -> [ :interpreter :receiver |
 			   receiver
 		  ].
 		} 
@@ -86,10 +89,10 @@ WollokReducedLoader >> loadInto: anInterpreter [
 		addBindingOfClass: 'wollok.lang.Boolean'
 		of: #wollokLangBoolean
 		withMethods: {
-		  #&& -> [ :receiver :anotherBoolean |
+		  #'&&/1' -> [ :interpreter :receiver :anotherBoolean |
 			   anInterpreter wollokBooleanFrom: receiver literalValue & anotherBoolean literalValue
 		  ].
-		  #|| -> [ :receiver :anotherBoolean |
+		  #'||/1' -> [ :interpreter :receiver :anotherBoolean |
 			   anInterpreter wollokBooleanFrom: receiver literalValue | anotherBoolean literalValue
 		  ].
 		}
@@ -103,7 +106,7 @@ WollokReducedLoader >> loadInto: anInterpreter [
 		addBindingOfClass: 'wollok.lang.String'
 		of: #wollokLangString
 		withMethods: {
-		  #+ -> [ :receiver :anotherString |
+		  #'+/1' -> [ :interpreter :receiver :anotherString |
 			   anInterpreter wollokStringFrom: receiver literalValue, anotherString literalValue
 		  ].
 		}

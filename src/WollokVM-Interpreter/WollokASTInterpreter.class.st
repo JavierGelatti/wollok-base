@@ -61,9 +61,9 @@ WollokASTInterpreter >> send: selector to: receiver with: arguments [
 	
 	method := receiver wollokClass
 		methodFor: selector
-		ifNone: [ self notYetImplemented ].
+		ifNone: [ self notYetImplemented "method not found" ]. 
 		
-	^ method valueWithArguments: { receiver }, arguments
+	^ method valueWithArguments: { self. receiver }, arguments
 ]
 
 { #category : #visiting }
@@ -72,7 +72,7 @@ WollokASTInterpreter >> visitBinaryOperation: aBinaryOperationNode [
 
 	leftValue := (aBinaryOperationNode leftOperand acceptVisitor: self).
 	rightValue := (aBinaryOperationNode rightOperand acceptVisitor: self).
-	operator := aBinaryOperationNode operation value asSymbol.
+	operator := (aBinaryOperationNode operation value, '/1') asSymbol.
 	
 	^ self send: operator to: leftValue with: { rightValue }
 ]
@@ -83,6 +83,31 @@ WollokASTInterpreter >> visitBooleanLiteral: aBooleanLiteralNode [
   ^ self wollokBooleanFrom: aBooleanLiteralNode booleanValue
 ]
 
+{ #category : #'as yet unclassified' }
+WollokASTInterpreter >> visitConstructorCall: aConstructorCallNode [
+   | className |
+
+	className := aConstructorCallNode classRef identifiers first value.
+   ^ WollokVMObject new wollokClass: (self resolve: className); 
+       yourself.
+]
+
+{ #category : #'as yet unclassified' }
+WollokASTInterpreter >> visitIfExpression: anIfExpressionNode [
+   | condition then else |
+	condition := anIfExpressionNode condition acceptVisitor: self.
+	then := anIfExpressionNode then acceptVisitor: self.
+   else := anIfExpressionNode else acceptVisitor: self.
+	
+	condition literalValue ifTrue: [ 
+		^then
+	] ifFalse: [ 
+		^else  
+	].
+
+	self shouldBeImplemented.
+]
+
 { #category : #visiting }
 WollokASTInterpreter >> visitMemberFeatureCall: aMemberFeatureCallNode [
 
@@ -90,8 +115,8 @@ WollokASTInterpreter >> visitMemberFeatureCall: aMemberFeatureCallNode [
 	
 	receiver := aMemberFeatureCallNode receiver acceptVisitor: self.
 	arguments := aMemberFeatureCallNode arguments collect: [ :argument | argument acceptVisitor: self ].
-	selector := aMemberFeatureCallNode feature value asSymbol.
-	
+	selector := (aMemberFeatureCallNode feature value, '/' , arguments size asString) asSymbol.
+
 	^ self send: selector to: receiver with: arguments
 ]
 
@@ -114,7 +139,7 @@ WollokASTInterpreter >> visitUnaryOperation: aUnaryOperationNode [
 	
 	operator := aUnaryOperationNode operation value.
 	
-	^ self send: ('@', operator) asSymbol to: operand with: { }
+	^ self send: ('@', operator, '/0') asSymbol to: operand with: { }
 ]
 
 { #category : #literals }

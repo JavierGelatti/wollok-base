@@ -26,6 +26,11 @@ WollokVMClass >> ast: anObject [
 	ast := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+WollokVMClass >> mergeMethods: anotherMethodDictionary [
+	methodDictionary:= methodDictionary union: anotherMethodDictionary.
+]
+
 { #category : #accessing }
 WollokVMClass >> methodDictionary: aMethodDictionary [
 	methodDictionary := aMethodDictionary
