@@ -50,34 +50,34 @@ WollokReducedLoader >> loadInto: anInterpreter [
 		of: #wollokLangNumber 
 		withMethods: {
 		  #'invert/0' -> [ :interpreter :receiver |
-			   anInterpreter wollokNumberFrom: receiver literalValue negated
+			   interpreter wollokNumberFrom: receiver literalValue negated
 		  ].
 	     #'truncate/1' -> [ :interpreter :receiver :numberOfDecimals |
-			   anInterpreter wollokNumberFrom: (receiver literalValue truncateTo: 1 / (10 ** numberOfDecimals literalValue)) asFloat
+			   interpreter wollokNumberFrom: (receiver literalValue truncateTo: 1 / (10 ** numberOfDecimals literalValue)) asFloat
 		  ].
         #'>/1' -> [ :interpreter :receiver :anotherNumber |
-			   anInterpreter wollokBooleanFrom: receiver literalValue > anotherNumber literalValue
+			   interpreter wollokBooleanFrom: receiver literalValue > anotherNumber literalValue
 		  ].
 		  #'</1' -> [ :interpreter :receiver :anotherNumber |
-			   anInterpreter wollokBooleanFrom: receiver literalValue < anotherNumber literalValue
+			   interpreter wollokBooleanFrom: receiver literalValue < anotherNumber literalValue
 		  ].
 			#'+/1' -> [ :interpreter :receiver :anotherNumber |
-			   anInterpreter wollokNumberFrom: receiver literalValue + anotherNumber literalValue
+			   interpreter wollokNumberFrom: receiver literalValue + anotherNumber literalValue
 		  ].
 			#'-/1' -> [ :interpreter :receiver :anotherNumber |
-			   anInterpreter wollokNumberFrom: receiver literalValue - anotherNumber literalValue
+			   interpreter wollokNumberFrom: receiver literalValue - anotherNumber literalValue
 		  ].
 			#'//1' -> [ :interpreter :receiver :anotherNumber |
-			   anInterpreter wollokNumberFrom: receiver literalValue / anotherNumber literalValue
+			   interpreter wollokNumberFrom: receiver literalValue / anotherNumber literalValue
 		  ].
 			#'%/1' -> [ :interpreter :receiver :anotherNumber |
-			   anInterpreter wollokNumberFrom: receiver literalValue % anotherNumber literalValue
+			   interpreter wollokNumberFrom: receiver literalValue % anotherNumber literalValue
 		  ].
 			#'*/1' -> [ :interpreter :receiver :anotherNumber |
-			   anInterpreter wollokNumberFrom: receiver literalValue * anotherNumber literalValue
+			   interpreter wollokNumberFrom: receiver literalValue * anotherNumber literalValue
 		  ].
 			#'@-/0' -> [ :interpreter :receiver |
-			   anInterpreter wollokNumberFrom: receiver literalValue negated
+			   interpreter wollokNumberFrom: receiver literalValue negated
 		  ].
 			#'@+/0' -> [ :interpreter :receiver |
 			   receiver
@@ -90,10 +90,10 @@ WollokReducedLoader >> loadInto: anInterpreter [
 		of: #wollokLangBoolean
 		withMethods: {
 		  #'&&/1' -> [ :interpreter :receiver :anotherBoolean |
-			   anInterpreter wollokBooleanFrom: receiver literalValue & anotherBoolean literalValue
+			   interpreter wollokBooleanFrom: receiver literalValue & anotherBoolean literalValue
 		  ].
 		  #'||/1' -> [ :interpreter :receiver :anotherBoolean |
-			   anInterpreter wollokBooleanFrom: receiver literalValue | anotherBoolean literalValue
+			   interpreter wollokBooleanFrom: receiver literalValue | anotherBoolean literalValue
 		  ].
 		}
 		in: anInterpreter.
@@ -107,7 +107,7 @@ WollokReducedLoader >> loadInto: anInterpreter [
 		of: #wollokLangString
 		withMethods: {
 		  #'+/1' -> [ :interpreter :receiver :anotherString |
-			   anInterpreter wollokStringFrom: receiver literalValue, anotherString literalValue
+			   interpreter wollokStringFrom: receiver literalValue, anotherString literalValue
 		  ].
 		}
 		in: anInterpreter.
