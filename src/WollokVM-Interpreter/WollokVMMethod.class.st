@@ -18,6 +18,17 @@ WollokVMMethod class >> named: aString withParameters: aCollection withBody: aWo
 ]
 
 { #category : #'as yet unclassified' }
+WollokVMMethod >> evaluateBoundTo: receiver with: arguments context: anInterpreter [
+  "| interpreter receiver arguments |
+  interpreter := context first.
+  receiver := context second.
+  arguments := context allButFirst allButFirst.
+  interpreter "
+  
+  ^ anInterpreter wollokNumberFrom: 42.
+]
+
+{ #category : #'as yet unclassified' }
 WollokVMMethod >> initializeWithName: aString parameters: aCollection body: aBlockExpressionNode [ 
    name := aString.
    parameters := aCollection.
@@ -32,16 +43,4 @@ WollokVMMethod >> name [
 { #category : #'as yet unclassified' }
 WollokVMMethod >> selector [
 	^ (name asString, '/' , parameters size asString) asSymbol.
-]
-
-{ #category : #'as yet unclassified' }
-WollokVMMethod >> valueWithArguments: context [
-  "| interpreter receiver arguments |
-  interpreter := context first.
-  receiver := context second.
-  arguments := context allButFirst allButFirst.
-  interpreter "
-  | interpreter |
-  interpreter := context first.
-  ^  interpreter wollokNumberFrom: 42.
 ]

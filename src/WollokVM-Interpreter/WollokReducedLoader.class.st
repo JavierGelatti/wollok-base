@@ -19,7 +19,7 @@ WollokReducedLoader >> addBindingOfClass: aName fromString: aString withMethods:
 	aClassDeclarationInterpreter := ClassDeclarationInterpreter new.
 
    aWollokClass := anAST acceptVisitor: aClassDeclarationInterpreter.
-   aWollokClass name: aName ; ast: anAST; mergeMethods: methodsDict.
+   aWollokClass name: aName ; ast: anAST; mergeMethods: (methodsDict collect: [:block | WollokVMNativeMethod fromBlocK: block ]).
 	"aWollokClass := WollokVMClass new
 		name: aName;
 		ast: anAST;

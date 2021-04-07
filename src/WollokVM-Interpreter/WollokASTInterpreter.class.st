@@ -63,7 +63,7 @@ WollokASTInterpreter >> send: selector to: receiver with: arguments [
 		methodFor: selector
 		ifNone: [ self notYetImplemented "method not found" ]. 
 		
-	^ method valueWithArguments: { self. receiver }, arguments
+	^ method evaluateBoundTo: receiver with: arguments context: self
 ]
 
 { #category : #visiting }
