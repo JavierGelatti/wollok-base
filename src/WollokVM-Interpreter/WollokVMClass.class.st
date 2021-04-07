@@ -28,7 +28,7 @@ WollokVMClass >> ast: anObject [
 
 { #category : #'as yet unclassified' }
 WollokVMClass >> mergeMethods: anotherMethodDictionary [
-	methodDictionary:= methodDictionary union: anotherMethodDictionary.
+	methodDictionary := methodDictionary union: anotherMethodDictionary.
 ]
 
 { #category : #accessing }
@@ -38,7 +38,7 @@ WollokVMClass >> methodDictionary: aMethodDictionary [
 
 { #category : #'message execution' }
 WollokVMClass >> methodFor: aSelector ifNone: aBlock [
-	^methodDictionary at: aSelector ifAbsent: aBlock.
+	^ methodDictionary at: aSelector ifAbsent: aBlock.
 ]
 
 { #category : #accessing }

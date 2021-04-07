@@ -10,21 +10,18 @@ WollokReducedLoader >> addBindingOfClass: aName fromString: aString in: anInterp
 ]
 
 { #category : #'as yet unclassified' }
-WollokReducedLoader >> addBindingOfClass: aName fromString: aString withNativeMethodsDictionary: methodsDict in: anInterpreter [
-
-	| anAST aWollokClass aClassDeclarationInterpreter |
+WollokReducedLoader >> addBindingOfClass: aName fromString: aString withNativeMethodsDictionary: nativeMethodsDictionary in: anInterpreter [
+	| anAST aWollokClass |
 	
 	anAST := WollokParser parse: aString.
 	anAST attributeNamed: #source put: aString.
-	aClassDeclarationInterpreter := ClassDeclarationInterpreter new.
-
-   aWollokClass := anAST acceptVisitor: aClassDeclarationInterpreter.
-   aWollokClass
-		name: aName;
-		ast: anAST;
-		mergeMethods: methodsDict.
 	
-	anInterpreter addBinding: aName value: aWollokClass.
+	aWollokClass := WollokClassDeclarationInterpreter
+		interpretClassNamed: aName
+		from: anAST
+		withNativeMethods: nativeMethodsDictionary.
+	
+	anInterpreter addBinding: aName value: aWollokClass
 ]
 
 { #category : #'as yet unclassified' }
@@ -123,11 +120,6 @@ WollokReducedLoader >> loadInto: anInterpreter [
 		in: anInterpreter.
 
 	self addBindingOfClass: 'wollok.lang.Exception' of: #wollokLangException in: anInterpreter.							
-]
-
-{ #category : #'as yet unclassified' }
-WollokReducedLoader >> nativeMethod: aMethodName definedAs: aBlock [
-	^ WollokVMNativeMethod named: aMethodName definedAs: aBlock.
 ]
 
 { #category : #'as yet unclassified' }

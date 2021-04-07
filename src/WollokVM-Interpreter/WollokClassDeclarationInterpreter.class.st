@@ -1,11 +1,23 @@
 Class {
-	#name : #ClassDeclarationInterpreter,
+	#name : #WollokClassDeclarationInterpreter,
 	#superclass : #Object,
 	#category : #'WollokVM-Interpreter'
 }
 
+{ #category : #'as yet unclassified' }
+WollokClassDeclarationInterpreter class >> interpretClassNamed: aName from: anAST withNativeMethods: nativeMethodsDictionary [
+	| aWollokClass |
+	
+	aWollokClass := anAST acceptVisitor: self new.
+	^ aWollokClass
+		name: aName;
+		ast: anAST;
+		mergeMethods: nativeMethodsDictionary;
+		yourself.
+]
+
 { #category : #visiting }
-ClassDeclarationInterpreter >> visitClass: aClassNode [
+WollokClassDeclarationInterpreter >> visitClass: aClassNode [
    | class methods |
 	class := WollokVMClass new.
 	methods := aClassNode members collect: [ :memberNode | 
@@ -17,12 +29,12 @@ ClassDeclarationInterpreter >> visitClass: aClassNode [
 ]
 
 { #category : #visiting }
-ClassDeclarationInterpreter >> visitFile: aWollokFileNode [ 
+WollokClassDeclarationInterpreter >> visitFile: aWollokFileNode [ 
    ^ aWollokFileNode elements first acceptVisitor: self.
 ]
 
 { #category : #visiting }
-ClassDeclarationInterpreter >> visitMethodDeclaration: aMethodDeclarationNode [ 
+WollokClassDeclarationInterpreter >> visitMethodDeclaration: aMethodDeclarationNode [ 
 	^ WollokVMCustomMethod 
 	    named: aMethodDeclarationNode name value asSymbol 
 		 withParameters: aMethodDeclarationNode parameters
