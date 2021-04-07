@@ -83,7 +83,7 @@ WollokASTInterpreter >> visitBooleanLiteral: aBooleanLiteralNode [
   ^ self wollokBooleanFrom: aBooleanLiteralNode booleanValue
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #visiting }
 WollokASTInterpreter >> visitConstructorCall: aConstructorCallNode [
    | className |
 
@@ -92,7 +92,7 @@ WollokASTInterpreter >> visitConstructorCall: aConstructorCallNode [
        yourself.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #visiting }
 WollokASTInterpreter >> visitIfExpression: anIfExpressionNode [
    | condition then else |
 	condition := anIfExpressionNode condition acceptVisitor: self.

@@ -4,7 +4,7 @@ Class {
 	#category : #'WollokVM-Interpreter'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #visiting }
 ClassDeclarationInterpreter >> visitClass: aClassNode [
    | class methods |
 	class := WollokVMClass new.
@@ -16,14 +16,14 @@ ClassDeclarationInterpreter >> visitClass: aClassNode [
 	^ class.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #visiting }
 ClassDeclarationInterpreter >> visitFile: aWollokFileNode [ 
    ^ aWollokFileNode elements first acceptVisitor: self.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #visiting }
 ClassDeclarationInterpreter >> visitMethodDeclaration: aMethodDeclarationNode [ 
-	^ WollokVMMethod 
+	^ WollokVMCustomMethod 
 	    named: aMethodDeclarationNode name value asSymbol 
 		 withParameters: aMethodDeclarationNode parameters
 	    withBody: aMethodDeclarationNode expression.
