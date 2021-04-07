@@ -55,7 +55,7 @@ WollokASTInterpreter >> resolve: aString [
 	^ bindings at: aString
 ]
 
-{ #category : #visiting }
+{ #category : #'message sending' }
 WollokASTInterpreter >> send: selector to: receiver with: arguments [
 	| method |
 	
@@ -72,9 +72,9 @@ WollokASTInterpreter >> visitBinaryOperation: aBinaryOperationNode [
 
 	leftValue := (aBinaryOperationNode leftOperand acceptVisitor: self).
 	rightValue := (aBinaryOperationNode rightOperand acceptVisitor: self).
-	operator := (aBinaryOperationNode operation value, '/1') asSymbol.
+	operator := aBinaryOperationNode operation value.
 	
-	^ self send: operator to: leftValue with: { rightValue }
+	^ self send: (operator, '/1') asSymbol to: leftValue with: { rightValue }
 ]
 
 { #category : #visiting }
@@ -97,12 +97,12 @@ WollokASTInterpreter >> visitIfExpression: anIfExpressionNode [
    | condition then else |
 	condition := anIfExpressionNode condition acceptVisitor: self.
 	then := anIfExpressionNode then acceptVisitor: self.
-   else := anIfExpressionNode else acceptVisitor: self.
+	else := anIfExpressionNode else acceptVisitor: self.
 	
 	condition literalValue ifTrue: [ 
-		^then
+		^ then
 	] ifFalse: [ 
-		^else  
+		^ else  
 	].
 
 	self shouldBeImplemented.
@@ -111,13 +111,13 @@ WollokASTInterpreter >> visitIfExpression: anIfExpressionNode [
 { #category : #visiting }
 WollokASTInterpreter >> visitMemberFeatureCall: aMemberFeatureCallNode [
 
-	| receiver arguments selector |
+	| receiver arguments featureName |
 	
 	receiver := aMemberFeatureCallNode receiver acceptVisitor: self.
 	arguments := aMemberFeatureCallNode arguments collect: [ :argument | argument acceptVisitor: self ].
-	selector := (aMemberFeatureCallNode feature value, '/' , arguments size asString) asSymbol.
+	featureName := aMemberFeatureCallNode feature value.
 
-	^ self send: selector to: receiver with: arguments
+	^ self send: (featureName, '/' , arguments size asString) asSymbol to: receiver with: arguments.
 ]
 
 { #category : #visiting }
@@ -127,7 +127,8 @@ WollokASTInterpreter >> visitNumberLiteral: aWollokNumberLiteralNode [
 ]
 
 { #category : #visiting }
-WollokASTInterpreter >> visitStringLiteral: aStringLiteralNode [ 
+WollokASTInterpreter >> visitStringLiteral: aStringLiteralNode [
+
 	^ self wollokStringFrom: aStringLiteralNode stringValue
 ]
 
@@ -136,7 +137,6 @@ WollokASTInterpreter >> visitUnaryOperation: aUnaryOperationNode [
 	
 	| operand operator |
 	operand := aUnaryOperationNode rightOperand acceptVisitor: self.
-	
 	operator := aUnaryOperationNode operation value.
 	
 	^ self send: ('@', operator, '/0') asSymbol to: operand with: { }

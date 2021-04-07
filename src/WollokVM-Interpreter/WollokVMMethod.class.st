@@ -18,11 +18,6 @@ WollokVMMethod >> evaluateBoundTo: receiver with: arguments context: anInterpret
 ]
 
 { #category : #accessing }
-WollokVMMethod >> name [
-	^ name
-]
-
-{ #category : #accessing }
 WollokVMMethod >> selector [
 	^ (name asString , '/' , self arity asString) asSymbol
 ]
