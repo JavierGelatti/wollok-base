@@ -6,11 +6,11 @@ Class {
 
 { #category : #'as yet unclassified' }
 WollokReducedLoader >> addBindingOfClass: aName fromString: aString in: anInterpreter [
-	self addBindingOfClass: aName fromString: aString withMethods: {} asDictionary in: anInterpreter 
+	self addBindingOfClass: aName fromString: aString withNativeMethodsDictionary: {} asDictionary in: anInterpreter 
 ]
 
 { #category : #'as yet unclassified' }
-WollokReducedLoader >> addBindingOfClass: aName fromString: aString withMethods: methodsDict in: anInterpreter [
+WollokReducedLoader >> addBindingOfClass: aName fromString: aString withNativeMethodsDictionary: methodsDict in: anInterpreter [
 
 	| anAST aWollokClass aClassDeclarationInterpreter |
 	
@@ -19,25 +19,35 @@ WollokReducedLoader >> addBindingOfClass: aName fromString: aString withMethods:
 	aClassDeclarationInterpreter := ClassDeclarationInterpreter new.
 
    aWollokClass := anAST acceptVisitor: aClassDeclarationInterpreter.
-   aWollokClass name: aName ; ast: anAST; mergeMethods: (methodsDict collect: [:block | WollokVMNativeMethod fromBlocK: block ]).
-	"aWollokClass := WollokVMClass new
+   aWollokClass
 		name: aName;
 		ast: anAST;
-		methodDictionary: methodsDict;
-		yourself."
+		mergeMethods: methodsDict.
 	
 	anInterpreter addBinding: aName value: aWollokClass.
 ]
 
 { #category : #'as yet unclassified' }
 WollokReducedLoader >> addBindingOfClass: aName of: selector in: anInterpreter [
-   self addBindingOfClass: aName of: selector withMethods: {} in: anInterpreter.
+   self addBindingOfClass: aName of: selector withNativeMethods: {} in: anInterpreter.
 ]
 
 { #category : #'as yet unclassified' }
-WollokReducedLoader >> addBindingOfClass: aName of: selector withMethods: methodList in: anInterpreter [
+WollokReducedLoader >> addBindingOfClass: aName of: selector withNativeMethods: methodList in: anInterpreter [
 
-	self addBindingOfClass: aName fromString: (self perform: selector) withMethods: methodList asDictionary in: anInterpreter 
+	| nativeMethodsDictionary |
+	nativeMethodsDictionary := (methodList collect: [:association | | methodName methodDefinition nativeMethod |
+		methodName := association key.
+		methodDefinition := association value.
+		nativeMethod := WollokVMNativeMethod named: methodName asString definedAs: methodDefinition.
+		nativeMethod selector -> nativeMethod
+	]) asDictionary.
+
+	self
+		addBindingOfClass: aName
+		fromString: (self perform: selector)
+		withNativeMethodsDictionary: nativeMethodsDictionary
+		in: anInterpreter 
 ]
 
 { #category : #'as yet unclassified' }
@@ -48,38 +58,38 @@ WollokReducedLoader >> loadInto: anInterpreter [
 	self 
 		addBindingOfClass: 'wollok.lang.Number' 
 		of: #wollokLangNumber 
-		withMethods: {
-		  #'invert/0' -> [ :interpreter :receiver |
+		withNativeMethods: {
+		  #invert -> [ :interpreter :receiver |
 			   interpreter wollokNumberFrom: receiver literalValue negated
 		  ].
-	     #'truncate/1' -> [ :interpreter :receiver :numberOfDecimals |
+			#truncate -> [ :interpreter :receiver :numberOfDecimals |
 			   interpreter wollokNumberFrom: (receiver literalValue truncateTo: 1 / (10 ** numberOfDecimals literalValue)) asFloat
 		  ].
-        #'>/1' -> [ :interpreter :receiver :anotherNumber |
+       #> -> [ :interpreter :receiver :anotherNumber |
 			   interpreter wollokBooleanFrom: receiver literalValue > anotherNumber literalValue
 		  ].
-		  #'</1' -> [ :interpreter :receiver :anotherNumber |
+		  #< -> [ :interpreter :receiver :anotherNumber |
 			   interpreter wollokBooleanFrom: receiver literalValue < anotherNumber literalValue
 		  ].
-			#'+/1' -> [ :interpreter :receiver :anotherNumber |
+			#+ -> [ :interpreter :receiver :anotherNumber |
 			   interpreter wollokNumberFrom: receiver literalValue + anotherNumber literalValue
 		  ].
-			#'-/1' -> [ :interpreter :receiver :anotherNumber |
+			#- -> [ :interpreter :receiver :anotherNumber |
 			   interpreter wollokNumberFrom: receiver literalValue - anotherNumber literalValue
 		  ].
-			#'//1' -> [ :interpreter :receiver :anotherNumber |
+			#/ -> [ :interpreter :receiver :anotherNumber |
 			   interpreter wollokNumberFrom: receiver literalValue / anotherNumber literalValue
 		  ].
-			#'%/1' -> [ :interpreter :receiver :anotherNumber |
+			#% -> [ :interpreter :receiver :anotherNumber |
 			   interpreter wollokNumberFrom: receiver literalValue % anotherNumber literalValue
 		  ].
-			#'*/1' -> [ :interpreter :receiver :anotherNumber |
+			#* -> [ :interpreter :receiver :anotherNumber |
 			   interpreter wollokNumberFrom: receiver literalValue * anotherNumber literalValue
 		  ].
-			#'@-/0' -> [ :interpreter :receiver |
+			#@- -> [ :interpreter :receiver |
 			   interpreter wollokNumberFrom: receiver literalValue negated
 		  ].
-			#'@+/0' -> [ :interpreter :receiver |
+			#@+ -> [ :interpreter :receiver |
 			   receiver
 		  ].
 		} 
@@ -88,11 +98,11 @@ WollokReducedLoader >> loadInto: anInterpreter [
 	self
 		addBindingOfClass: 'wollok.lang.Boolean'
 		of: #wollokLangBoolean
-		withMethods: {
-		  #'&&/1' -> [ :interpreter :receiver :anotherBoolean |
+		withNativeMethods: {
+		  #&& -> [ :interpreter :receiver :anotherBoolean |
 			   interpreter wollokBooleanFrom: receiver literalValue & anotherBoolean literalValue
 		  ].
-		  #'||/1' -> [ :interpreter :receiver :anotherBoolean |
+		  #|| -> [ :interpreter :receiver :anotherBoolean |
 			   interpreter wollokBooleanFrom: receiver literalValue | anotherBoolean literalValue
 		  ].
 		}
@@ -105,14 +115,19 @@ WollokReducedLoader >> loadInto: anInterpreter [
 	self
 		addBindingOfClass: 'wollok.lang.String'
 		of: #wollokLangString
-		withMethods: {
-		  #'+/1' -> [ :interpreter :receiver :anotherString |
+		withNativeMethods: {
+		  #+ -> [ :interpreter :receiver :anotherString |
 			   interpreter wollokStringFrom: receiver literalValue, anotherString literalValue
 		  ].
 		}
 		in: anInterpreter.
 
 	self addBindingOfClass: 'wollok.lang.Exception' of: #wollokLangException in: anInterpreter.							
+]
+
+{ #category : #'as yet unclassified' }
+WollokReducedLoader >> nativeMethod: aMethodName definedAs: aBlock [
+	^ WollokVMNativeMethod named: aMethodName definedAs: aBlock.
 ]
 
 { #category : #'as yet unclassified' }
