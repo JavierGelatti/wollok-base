@@ -23,7 +23,9 @@ WollokClassDeclarationInterpreter >> visitClass: aClassNode [
 	methods := aClassNode members collect: [ :memberNode | 
 		memberNode acceptVisitor: self.
 	].
-   class methodDictionary: (methods collect: [ :method | method selector -> method ]) asDictionary.
+  class methodDictionary: (methods collect: [ :method | method selector -> method ]) asDictionary.
+
+	class instanceVariableDeclarations: aClassNode variables.
 
 	^ class.
 ]

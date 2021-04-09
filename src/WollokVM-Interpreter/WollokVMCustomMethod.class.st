@@ -23,13 +23,12 @@ WollokVMCustomMethod >> arity [
 
 { #category : #evaluating }
 WollokVMCustomMethod >> evaluateBoundTo: receiver with: arguments context: anInterpreter [
-  "| interpreter receiver arguments |
-  interpreter := context first.
-  receiver := context second.
-  arguments := context allButFirst allButFirst.
-  interpreter "
-  
-  ^ anInterpreter wollokNumberFrom: 42.
+  | parameterNames argumentBindings |
+	parameterNames := parameters collect: [:parameter | parameter parameter value ].
+	argumentBindings := (parameterNames with: arguments collect: [:parameterName :argument |
+		parameterName -> argument
+	]) asDictionary.
+  ^ anInterpreter interpretExpression: body withinReceiver: receiver withAdditionalBindings: argumentBindings.
 ]
 
 { #category : #initialization }

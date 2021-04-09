@@ -2,7 +2,8 @@ Class {
 	#name : #WollokVMObject,
 	#superclass : #Object,
 	#instVars : [
-		'wollokClass'
+		'wollokClass',
+		'instanceVariables'
 	],
 	#category : #'WollokVM-Interpreter'
 }
@@ -20,6 +21,16 @@ WollokVMObject >> gtInspectorVariablesIn: composite [
 			selection
 				ifNil: [ nil ]
 				ifNotNil: [ selection value ] ]
+]
+
+{ #category : #accessing }
+WollokVMObject >> instanceVariableNamed: aVariableName [
+	^ instanceVariables at: aVariableName 
+]
+
+{ #category : #accessing }
+WollokVMObject >> instanceVariables: aCollection [ 
+	instanceVariables := aCollection
 ]
 
 { #category : #accessing }

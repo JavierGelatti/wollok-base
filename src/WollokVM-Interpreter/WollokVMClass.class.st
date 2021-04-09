@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'name',
 		'ast',
-		'methodDictionary'
+		'methodDictionary',
+		'instanceVariableDeclarations'
 	],
 	#category : #'WollokVM-Interpreter'
 }
@@ -24,6 +25,24 @@ WollokVMClass >> ast [
 { #category : #accessing }
 WollokVMClass >> ast: anObject [
 	ast := anObject
+]
+
+{ #category : #accessing }
+WollokVMClass >> instanceVariableDeclarations: instanceVariables [ 
+	instanceVariableDeclarations := instanceVariables.
+]
+
+{ #category : #'as yet unclassified' }
+WollokVMClass >> instanceVariablesForNewObjectInContext: aWollokASTInterpreter [ 
+	^ (instanceVariableDeclarations collect: [ :instanceVariableDeclaration | | instanceVariableName instanceVariableValue |
+		instanceVariableName := instanceVariableDeclaration variable name value.
+		instanceVariableValue := instanceVariableDeclaration right ifNil: [
+			aWollokASTInterpreter wollokNull
+		] ifNotNil: [ :expressionForInitialValue |
+			aWollokASTInterpreter interpretExpression: expressionForInitialValue
+		].
+		instanceVariableName -> instanceVariableValue
+	]) asDictionary.
 ]
 
 { #category : #'as yet unclassified' }
