@@ -5,7 +5,8 @@ Class {
 		'name',
 		'ast',
 		'methodDictionary',
-		'instanceVariableDeclarations'
+		'instanceVariableDeclarations',
+		'superclass'
 	],
 	#category : #'WollokVM-Interpreter'
 }
@@ -28,21 +29,47 @@ WollokVMClass >> ast: anObject [
 ]
 
 { #category : #accessing }
+WollokVMClass >> instanceVariableDeclarations [
+
+	| instanceVariableDeclarationsFromSuperclass instanceVariableDeclarationsFromMyself |
+	
+	instanceVariableDeclarationsFromSuperclass := superclass ifNil: [ Dictionary new ] ifNotNil: [ superclass instanceVariableDeclarations ].
+
+  instanceVariableDeclarationsFromMyself := (instanceVariableDeclarations collect: [ :instanceVariableDeclaration |
+	  | instanceVariableName instanceVariableValue |
+		instanceVariableName := instanceVariableDeclaration variable name value.
+		instanceVariableValue := instanceVariableDeclaration right.
+		instanceVariableName -> instanceVariableValue
+	]) asDictionary.
+
+	^ instanceVariableDeclarationsFromSuperclass union: instanceVariableDeclarationsFromMyself
+]
+
+{ #category : #accessing }
 WollokVMClass >> instanceVariableDeclarations: instanceVariables [ 
 	instanceVariableDeclarations := instanceVariables.
 ]
 
 { #category : #'as yet unclassified' }
-WollokVMClass >> instanceVariablesForNewObjectInContext: aWollokASTInterpreter [ 
-	^ (instanceVariableDeclarations collect: [ :instanceVariableDeclaration | | instanceVariableName instanceVariableValue |
-		instanceVariableName := instanceVariableDeclaration variable name value.
-		instanceVariableValue := instanceVariableDeclaration right ifNil: [
-			aWollokASTInterpreter wollokNull
-		] ifNotNil: [ :expressionForInitialValue |
-			aWollokASTInterpreter interpretExpression: expressionForInitialValue
-		].
-		instanceVariableName -> instanceVariableValue
-	]) asDictionary.
+WollokVMClass >> instanceVariablesForNewObjectInContext: aWollokASTInterpreter [
+  | initializedInstanceVariables |
+	initializedInstanceVariables := Dictionary new.
+	self instanceVariableDeclarations keysAndValuesDo: [ :instanceVariableName :expressionForInitialValue |
+		initializedInstanceVariables
+			at: instanceVariableName
+			put: (self interpret: expressionForInitialValue using: aWollokASTInterpreter)
+	].
+	^ initializedInstanceVariables
+]
+
+{ #category : #'as yet unclassified' }
+WollokVMClass >> interpret: expressionForInitialValue using: aWollokASTInterpreter [
+	| instanceVariableValue |
+	instanceVariableValue := expressionForInitialValue
+		ifNil: [ aWollokASTInterpreter wollokNull ]
+		ifNotNil:
+			[ aWollokASTInterpreter interpretExpression: expressionForInitialValue ].
+	^ instanceVariableValue
 ]
 
 { #category : #'as yet unclassified' }
@@ -57,7 +84,11 @@ WollokVMClass >> methodDictionary: aMethodDictionary [
 
 { #category : #'message execution' }
 WollokVMClass >> methodFor: aSelector ifNone: aBlock [
-	^ methodDictionary at: aSelector ifAbsent: aBlock.
+	^ self -> (methodDictionary at: aSelector ifAbsent: [
+		superclass ifNil: [ ^ aBlock value 	].
+
+		^ superclass methodFor: aSelector ifNone: aBlock
+	]).
 ]
 
 { #category : #accessing }
@@ -81,4 +112,14 @@ WollokVMClass >> printOn: aStream [
 		print: name;
 		nextPut: $)
 		 
+]
+
+{ #category : #accessing }
+WollokVMClass >> superclass [
+	^ superclass
+]
+
+{ #category : #accessing }
+WollokVMClass >> superclass: aWollokClass [ 
+	superclass := aWollokClass
 ]

@@ -12,15 +12,18 @@ WollokReducedLoader >> addBindingOfClass: aName fromString: aString in: anInterp
 { #category : #'as yet unclassified' }
 WollokReducedLoader >> addBindingOfClass: aName fromString: aString withNativeMethodsDictionary: nativeMethodsDictionary in: anInterpreter [
 	| anAST aWollokClass |
-	
 	anAST := WollokParser parse: aString.
 	anAST attributeNamed: #source put: aString.
-	
 	aWollokClass := WollokClassDeclarationInterpreter
 		interpretClassNamed: aName
 		from: anAST
-		withNativeMethods: nativeMethodsDictionary.
+		withNativeMethods: nativeMethodsDictionary
+		resolvingReferencesWith: anInterpreter.
 	
+	(aWollokClass superclass isNil and: [ aName ~= 'wollok.lang.Object']) ifTrue: [ 
+		aWollokClass superclass: (anInterpreter resolve: 'wollok.lang.Object')
+	].
+		
 	anInterpreter addBinding: aName value: aWollokClass
 ]
 
@@ -88,6 +91,9 @@ WollokReducedLoader >> loadInto: anInterpreter [
 		  ].
 			#@+ -> [ :interpreter :receiver |
 			   receiver
+		  ].
+			#=== -> [ :interpreter :receiver :other |
+			   interpreter wollokBooleanFrom: receiver literalValue = other literalValue
 		  ].
 		} 
 		in: anInterpreter.
@@ -915,7 +921,7 @@ WollokReducedLoader >> wollokLangList [
  * @author jfernandes
  * @since 1.3
  */
-class List inherits Collection {
+class List inherits wollok.lang.Collection {
 
   /**
    * Answers the element at the specified position in this non-empty list.
@@ -1721,7 +1727,7 @@ WollokReducedLoader >> wollokLangSet [
  * @author jfernandes
  * @since 1.3
  */
-class Set inherits Collection {
+class Set inherits wollok.lang.Collection {
 
   /** @private */
   override method newInstance() = #{}

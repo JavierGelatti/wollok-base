@@ -3,8 +3,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'bindings',
-		'returnBinding',
-		'receiverBinding'
+		'contextStack'
 	],
 	#category : #'WollokVM-Interpreter'
 }
@@ -21,12 +20,28 @@ WollokASTInterpreter >> addBindingOfClass: aName fromString: aString [
 	WollokReducedLoader new addBindingOfClass: aName fromString: aString in: self
 ]
 
+{ #category : #bindings }
+WollokASTInterpreter >> currentClass [
+	^ contextStack top currentClass
+]
+
+{ #category : #bindings }
+WollokASTInterpreter >> currentMethod [
+	^ contextStack top method
+]
+
+{ #category : #bindings }
+WollokASTInterpreter >> currentReceiver [
+	^ contextStack top receiver
+]
+
 { #category : #interpreting }
 WollokASTInterpreter >> initialize [
 
 	super initialize.
 
 	bindings := Dictionary new.
+	contextStack := Stack new.
 	
 	WollokReducedLoader new loadInto: self
 ]
@@ -35,13 +50,6 @@ WollokASTInterpreter >> initialize [
 WollokASTInterpreter >> interpretExpression: anExpressionNode [ 
 
 	^ anExpressionNode acceptVisitor: self
-]
-
-{ #category : #interpreting }
-WollokASTInterpreter >> interpretExpression: anExpressionNode withinReceiver: aWollokObject withAdditionalBindings: arguments [ 
-	receiverBinding := aWollokObject.
-	bindings := bindings union: arguments.
-	^ self interpretExpression: anExpressionNode.
 ]
 
 { #category : #interpreting }
@@ -75,15 +83,34 @@ WollokASTInterpreter >> resolve: aString [
 	^ bindings at: aString
 ]
 
+{ #category : #'as yet unclassified' }
+WollokASTInterpreter >> return: aWollokObject [
+	contextStack pop return: aWollokObject
+]
+
 { #category : #'message sending' }
 WollokASTInterpreter >> send: selector to: receiver with: arguments [
-	| method |
+	^ self send: selector to: receiver with: arguments startingLookupFrom: receiver wollokClass.
+]
+
+{ #category : #'message sending' }
+WollokASTInterpreter >> send: selector to: receiver with: arguments startingLookupFrom: aWollokClass [
+	| methodWithClass class method result methodActivation |
 	
-	method := receiver wollokClass
+	methodWithClass := aWollokClass
 		methodFor: selector
-		ifNone: [ self notYetImplemented "method not found" ]. 
-		
-	^ method evaluateBoundTo: receiver with: arguments context: self
+		ifNone: [ Error signal: 'method ', selector asString, ' not found for ', receiver wollokClass name ].
+	
+	method := methodWithClass value.
+	class := methodWithClass key.
+	
+	methodActivation := WollokVMMethodActivation newFor: method comingFrom: class boundTo: receiver withArguments: arguments returningWith: [:x | ^ x].
+	
+	contextStack push: methodActivation.
+	result := method evaluateBoundTo: receiver with: arguments context: self.
+	contextStack pop.
+	
+	^ result
 ]
 
 { #category : #visiting }
@@ -92,7 +119,13 @@ WollokASTInterpreter >> visitAssignment: anAssignmentNode [
 	variableName := anAssignmentNode variable name value.
 	variableValue := self interpretExpression: anAssignmentNode value.
 	
-	bindings at: variableName put: variableValue.
+	contextStack isEmpty ifTrue: [ 
+		bindings at: variableName put: variableValue.
+	] ifFalse: [ 
+		contextStack top at: variableName put: variableValue ifNotBound: [
+			bindings at: variableName put: variableValue.
+		].
+	].	
 	
 	^ variableValue.
 ]
@@ -110,8 +143,15 @@ WollokASTInterpreter >> visitBinaryOperation: aBinaryOperationNode [
 
 { #category : #visiting }
 WollokASTInterpreter >> visitBlockExpression: aBlockExpressionNode [
-  returnBinding := [ :valueToReturn | ^ valueToReturn ].
-	^ (aBlockExpressionNode expressions collect: [ :expression | self interpretExpression: expression ]) last.
+
+	| expressions |
+	expressions := aBlockExpressionNode expressions.
+	
+	^ expressions ifEmpty: [
+		self wollokNull
+	] ifNotEmpty: [
+		(expressions collect: [ :expression | self interpretExpression: expression ]) last
+	].
 ]
 
 { #category : #visiting }
@@ -121,22 +161,21 @@ WollokASTInterpreter >> visitBooleanLiteral: aBooleanLiteralNode [
 ]
 
 { #category : #visiting }
-WollokASTInterpreter >> visitClosure: aClosureNode [ 
-	^ self interpretExpression: aClosureNode expression.
-]
-
-{ #category : #visiting }
 WollokASTInterpreter >> visitConstructorCall: aConstructorCallNode [
-   | className class instanceVariables |
+   | className class instanceVariables newObject |
 
 	className := aConstructorCallNode classRef identifiers first value.
 	class := self resolve: className.
 	instanceVariables := 	class instanceVariablesForNewObjectInContext: self.
 		
-   ^ WollokVMObject new
+   newObject := WollokVMObject new
 			wollokClass: class;
 			instanceVariables: instanceVariables;
        yourself.
+	
+	self send: #'initialize/0' to: newObject with: #().
+	
+	^ newObject.
 ]
 
 { #category : #visiting }
@@ -173,13 +212,27 @@ WollokASTInterpreter >> visitReturnExpression: aReturnExpressionNode [
   | result |
   result := self interpretExpression: aReturnExpressionNode expression.
 
-  returnBinding value: result.
+  self return: result.
+]
+
+{ #category : #visiting }
+WollokASTInterpreter >> visitSelf: aSelfNode [ 
+	^ self currentReceiver
 ]
 
 { #category : #visiting }
 WollokASTInterpreter >> visitStringLiteral: aStringLiteralNode [
 
 	^ self wollokStringFrom: aStringLiteralNode stringValue
+]
+
+{ #category : #visiting }
+WollokASTInterpreter >> visitSuperInvocation: aSuperInvocationNode [ 
+	| arguments |
+	
+	arguments := aSuperInvocationNode arguments collect: [ :argument | argument acceptVisitor: self ].
+
+	^ self send: self currentMethod selector to: self currentReceiver with: arguments startingLookupFrom: self currentClass superclass.
 ]
 
 { #category : #visiting }
@@ -196,9 +249,14 @@ WollokASTInterpreter >> visitUnaryOperation: aUnaryOperationNode [
 WollokASTInterpreter >> visitVariable: aVariableNode [
 	| variableName |
 	variableName := aVariableNode name value.
-	^ bindings at: variableName ifAbsent: [
-		receiverBinding instanceVariableNamed: variableName
-	].
+	
+	^ contextStack isEmpty ifTrue: [ 
+		bindings at: variableName
+	] ifFalse: [ 
+		contextStack top resolve: variableName ifNotBound: [
+			bindings at: variableName
+		].
+	]
 ]
 
 { #category : #visiting }
@@ -208,7 +266,13 @@ WollokASTInterpreter >> visitVariableDeclaration: aVariableDeclarationNode [
 	variableName := aVariableDeclarationNode variable name value.
 	variableValue := self interpretExpression: aVariableDeclarationNode right.
 	
-	bindings at: variableName put: variableValue.
+	contextStack isEmpty ifTrue: [ 
+		bindings at: variableName put: variableValue.
+	] ifFalse: [
+		contextStack top declareVariableNamed: variableName withInitialValue: variableValue.
+	].
+	
+	
 	
 	^ variableValue.
 	

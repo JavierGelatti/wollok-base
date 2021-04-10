@@ -28,3 +28,8 @@ WollokVMNativeMethod >> initializeNamed: aMethodName definedAs: aBlock [
 	name := aMethodName.
 	nativeBlock := aBlock
 ]
+
+{ #category : #accessing }
+WollokVMNativeMethod >> parameterNames [
+	^ (nativeBlock argumentNames allButFirst: 2) collect: #asString
+]

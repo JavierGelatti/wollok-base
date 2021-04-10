@@ -8,6 +8,11 @@ Class {
 	#category : #'WollokVM-Interpreter'
 }
 
+{ #category : #accessing }
+WollokVMObject >> atInstanceVariable: aVariableName put: aValue [
+	instanceVariables at: aVariableName put: aValue
+]
+
 { #category : #UI }
 WollokVMObject >> gtInspectorVariablesIn: composite [
 	<gtInspectorPresentationOrder: 1> 
@@ -24,8 +29,13 @@ WollokVMObject >> gtInspectorVariablesIn: composite [
 ]
 
 { #category : #accessing }
-WollokVMObject >> instanceVariableNamed: aVariableName [
-	^ instanceVariables at: aVariableName 
+WollokVMObject >> initialize [
+	instanceVariables := Dictionary new
+]
+
+{ #category : #accessing }
+WollokVMObject >> instanceVariables [
+	^ instanceVariables
 ]
 
 { #category : #accessing }

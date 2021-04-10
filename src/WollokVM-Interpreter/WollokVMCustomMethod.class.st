@@ -23,12 +23,8 @@ WollokVMCustomMethod >> arity [
 
 { #category : #evaluating }
 WollokVMCustomMethod >> evaluateBoundTo: receiver with: arguments context: anInterpreter [
-  | parameterNames argumentBindings |
-	parameterNames := parameters collect: [:parameter | parameter parameter value ].
-	argumentBindings := (parameterNames with: arguments collect: [:parameterName :argument |
-		parameterName -> argument
-	]) asDictionary.
-  ^ anInterpreter interpretExpression: body withinReceiver: receiver withAdditionalBindings: argumentBindings.
+
+  ^ anInterpreter interpretExpression: body.
 ]
 
 { #category : #initialization }
@@ -36,4 +32,9 @@ WollokVMCustomMethod >> initializeWithName: aString parameters: aCollection body
    name := aString.
    parameters := aCollection.
    body := aBlockExpressionNode.
+]
+
+{ #category : #accessing }
+WollokVMCustomMethod >> parameterNames [
+	^ parameters collect: [ :parameterNode | parameterNode parameter value ].
 ]
