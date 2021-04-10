@@ -64,12 +64,9 @@ WollokVMClass >> instanceVariablesForNewObjectInContext: aWollokASTInterpreter [
 
 { #category : #'as yet unclassified' }
 WollokVMClass >> interpret: expressionForInitialValue using: aWollokASTInterpreter [
-	| instanceVariableValue |
-	instanceVariableValue := expressionForInitialValue
+	^ expressionForInitialValue
 		ifNil: [ aWollokASTInterpreter wollokNull ]
-		ifNotNil:
-			[ aWollokASTInterpreter interpretExpression: expressionForInitialValue ].
-	^ instanceVariableValue
+		ifNotNil: [ aWollokASTInterpreter interpretExpression: expressionForInitialValue ]
 ]
 
 { #category : #'as yet unclassified' }

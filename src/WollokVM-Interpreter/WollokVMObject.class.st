@@ -1,9 +1,12 @@
 Class {
 	#name : #WollokVMObject,
 	#superclass : #Object,
+	#traits : 'TWollokScope',
+	#classTraits : 'TWollokScope classTrait',
 	#instVars : [
 		'wollokClass',
-		'instanceVariables'
+		'instanceVariables',
+		'parentScope'
 	],
 	#category : #'WollokVM-Interpreter'
 }
@@ -28,6 +31,12 @@ WollokVMObject >> gtInspectorVariablesIn: composite [
 				ifNotNil: [ selection value ] ]
 ]
 
+{ #category : #protected }
+WollokVMObject >> hasOwnDefinitionFor: aName [
+	^ instanceVariables includesKey: aName
+	
+]
+
 { #category : #accessing }
 WollokVMObject >> initialize [
 	instanceVariables := Dictionary new
@@ -50,6 +59,11 @@ WollokVMObject >> instanceVariablesValues [
 	^ #()
 ]
 
+{ #category : #'as yet unclassified' }
+WollokVMObject >> parentScope: aScope [ 
+	parentScope := aScope
+]
+
 { #category : #printing }
 WollokVMObject >> printOn: aStream [
 
@@ -64,13 +78,10 @@ WollokVMObject >> printOn: aStream [
 		 
 ]
 
-{ #category : #accessing }
-WollokVMObject >> valueCollection [
-
-	^ { 'self' -> self }, 
-			(self wollokClass allVariables
-				with: self instanceVariablesValues
-				collect: [ :n :v | n key variable name value -> v ])
+{ #category : #protected }
+WollokVMObject >> readOwnVariableNamed: aName [
+	^ instanceVariables at: aName
+	
 ]
 
 { #category : #accessing }
@@ -87,4 +98,10 @@ WollokVMObject >> wollokClass: anObject [
 WollokVMObject >> wollokClassName [
 	
 	^ wollokClass name
+]
+
+{ #category : #protected }
+WollokVMObject >> writeOwnVariableNamed: aName value: aValue [
+	instanceVariables at: aName put: aValue
+	
 ]

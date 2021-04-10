@@ -2,16 +2,15 @@ Class {
 	#name : #WollokASTInterpreter,
 	#superclass : #Object,
 	#instVars : [
-		'bindings',
-		'contextStack'
+		'contextStack',
+		'globalScope'
 	],
 	#category : #'WollokVM-Interpreter'
 }
 
 { #category : #bindings }
-WollokASTInterpreter >> addBinding: aName value: aWollokVMClass [ 
-	
-	bindings at: aName put: aWollokVMClass
+WollokASTInterpreter >> addBinding: aName value: aWollokVMClass [
+	globalScope declareVariableNamed: aName value: aWollokVMClass
 ]
 
 { #category : #bindings }
@@ -40,7 +39,7 @@ WollokASTInterpreter >> initialize [
 
 	super initialize.
 
-	bindings := Dictionary new.
+	globalScope := WollokGlobalScope new.
 	contextStack := Stack new.
 	
 	WollokReducedLoader new loadInto: self
@@ -78,9 +77,10 @@ WollokASTInterpreter >> isTrue: aWollokVMObject [
 ]
 
 { #category : #bindings }
-WollokASTInterpreter >> resolve: aString [ 
-	
-	^ bindings at: aString
+WollokASTInterpreter >> resolve: aName [
+	^ contextStack isEmpty
+		ifTrue: [ globalScope valueFor: aName ]
+		ifFalse: [ contextStack top readVariableNamed: aName ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -104,7 +104,7 @@ WollokASTInterpreter >> send: selector to: receiver with: arguments startingLook
 	method := methodWithClass value.
 	class := methodWithClass key.
 	
-	methodActivation := WollokVMMethodActivation newFor: method comingFrom: class boundTo: receiver withArguments: arguments returningWith: [:x | ^ x].
+	methodActivation := WollokVMMethodActivation newFor: method comingFrom: class boundTo: receiver withArguments: arguments returningWith: [:x | ^ x] parentScope: globalScope.
 	
 	contextStack push: methodActivation.
 	result := method evaluateBoundTo: receiver with: arguments context: self.
@@ -114,20 +114,14 @@ WollokASTInterpreter >> send: selector to: receiver with: arguments startingLook
 ]
 
 { #category : #visiting }
-WollokASTInterpreter >> visitAssignment: anAssignmentNode [ 
+WollokASTInterpreter >> visitAssignment: anAssignmentNode [
 	| variableName variableValue |
 	variableName := anAssignmentNode variable name value.
 	variableValue := self interpretExpression: anAssignmentNode value.
-	
-	contextStack isEmpty ifTrue: [ 
-		bindings at: variableName put: variableValue.
-	] ifFalse: [ 
-		contextStack top at: variableName put: variableValue ifNotBound: [
-			bindings at: variableName put: variableValue.
-		].
-	].	
-	
-	^ variableValue.
+	contextStack isEmpty
+		ifTrue: [ globalScope writeAt: variableName value: variableValue ]
+		ifFalse: [ contextStack top updateVariableNamed: variableName value: variableValue ].
+	^ variableValue
 ]
 
 { #category : #visiting }
@@ -171,6 +165,7 @@ WollokASTInterpreter >> visitConstructorCall: aConstructorCallNode [
    newObject := WollokVMObject new
 			wollokClass: class;
 			instanceVariables: instanceVariables;
+			parentScope: globalScope;
        yourself.
 	
 	self send: #'initialize/0' to: newObject with: #().
@@ -249,33 +244,21 @@ WollokASTInterpreter >> visitUnaryOperation: aUnaryOperationNode [
 WollokASTInterpreter >> visitVariable: aVariableNode [
 	| variableName |
 	variableName := aVariableNode name value.
-	
-	^ contextStack isEmpty ifTrue: [ 
-		bindings at: variableName
-	] ifFalse: [ 
-		contextStack top resolve: variableName ifNotBound: [
-			bindings at: variableName
-		].
-	]
+	^ self resolve: variableName
 ]
 
 { #category : #visiting }
 WollokASTInterpreter >> visitVariableDeclaration: aVariableDeclarationNode [
-
 	| variableName variableValue |
 	variableName := aVariableDeclarationNode variable name value.
-	variableValue := self interpretExpression: aVariableDeclarationNode right.
-	
-	contextStack isEmpty ifTrue: [ 
-		bindings at: variableName put: variableValue.
-	] ifFalse: [
-		contextStack top declareVariableNamed: variableName withInitialValue: variableValue.
-	].
-	
-	
-	
-	^ variableValue.
-	
+	variableValue := self
+		interpretExpression: aVariableDeclarationNode right.
+	contextStack isEmpty
+		ifTrue: [ globalScope declareVariableNamed: variableName value: variableValue ]
+		ifFalse: [ contextStack top
+				declareVariableNamed: variableName
+				value: variableValue ].
+	^ variableValue
 ]
 
 { #category : #literals }
@@ -284,12 +267,13 @@ WollokASTInterpreter >> wollokBooleanFrom: aSmalltalkBoolean [
 	^ WollokVMLiteral new
 		   wollokClass: (self resolve: 'wollok.lang.Boolean');
 		   literalValue: aSmalltalkBoolean;
-		   yourself
+			 parentScope: globalScope;
+			 yourself
 ]
 
 { #category : #literals }
 WollokASTInterpreter >> wollokNull [
-	^ WollokVMNull new
+	^ WollokVMNull new yourself
 ]
 
 { #category : #literals }
@@ -298,6 +282,7 @@ WollokASTInterpreter >> wollokNumberFrom: anInteger [
 	^ WollokVMLiteral new
 		wollokClass: (self resolve: 'wollok.lang.Number');
 		literalValue: anInteger;
+		parentScope: globalScope;
 		yourself
 ]
 
@@ -307,5 +292,6 @@ WollokASTInterpreter >> wollokStringFrom: aSmalltalkString [
 	^ WollokVMLiteral new
 		   wollokClass: (self resolve: 'wollok.lang.String');
 		   literalValue: aSmalltalkString;
+			 parentScope: globalScope;
 		   yourself
 ]

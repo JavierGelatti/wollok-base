@@ -1,25 +1,29 @@
 Class {
 	#name : #WollokVMMethodActivation,
 	#superclass : #Object,
+	#traits : 'TWollokScope',
+	#classTraits : 'TWollokScope classTrait',
 	#instVars : [
 		'method',
 		'class',
 		'receiver',
 		'arguments',
 		'localVariables',
-		'returnClosure'
+		'returnClosure',
+		'parentScope'
 	],
 	#category : #'WollokVM-Interpreter'
 }
 
 { #category : #'as yet unclassified' }
-WollokVMMethodActivation class >> newFor: aWollokMethod comingFrom: aWollokClass boundTo: aWollokObject withArguments: someArguments returningWith: aContinuationBlock [ 
+WollokVMMethodActivation class >> newFor: aWollokMethod comingFrom: aWollokClass boundTo: aWollokObject withArguments: someArguments returningWith: aContinuationBlock parentScope: aScope [
 	^ self new
 			initializeWithMethod: aWollokMethod
 			currentClass: aWollokClass
 			receiver: aWollokObject
 			arguments: someArguments
-			returnClosure: aContinuationBlock;
+			returnClosure: aContinuationBlock
+			parentScope: aScope;
 		yourself.
 ]
 
@@ -27,11 +31,7 @@ WollokVMMethodActivation class >> newFor: aWollokMethod comingFrom: aWollokClass
 WollokVMMethodActivation >> at: aVariableName put: aWollokObject ifNotBound: aBlock [
 	(localVariables includesKey: aVariableName) ifTrue: [
 		localVariables at: aVariableName put: aWollokObject 
-	] ifFalse: [
-		(receiver instanceVariables includesKey: aVariableName) ifTrue: [
-			receiver atInstanceVariable: aVariableName put: aWollokObject 
-		] ifFalse: aBlock
-	]
+	] ifFalse: aBlock
 ]
 
 { #category : #accesing }
@@ -39,18 +39,20 @@ WollokVMMethodActivation >> currentClass [
 	^ class
 ]
 
-{ #category : #'as yet unclassified' }
-WollokVMMethodActivation >> declareVariableNamed: aString withInitialValue: aWollokObject [
-	localVariables at: aString put: aWollokObject.
+{ #category : #protected }
+WollokVMMethodActivation >> hasOwnDefinitionFor: aName [
+	
+	^ (arguments union: localVariables) includesKey: aName.
 ]
 
 { #category : #initialization }
-WollokVMMethodActivation >> initializeWithMethod: aWollokMethod currentClass: aWollokClass receiver: aWollokObject arguments: someArguments returnClosure: aBlock [
+WollokVMMethodActivation >> initializeWithMethod: aWollokMethod currentClass: aWollokClass receiver: aWollokObject arguments: someArguments returnClosure: aBlock parentScope: aScope [
 	method := aWollokMethod.
 	class := aWollokClass.
 	receiver := aWollokObject.
 	localVariables := Dictionary new.
 	returnClosure := aBlock.
+	parentScope := aWollokObject.
 	
 	arguments := (method parameterNames with: someArguments collect: [:parameterName :argument |
 		parameterName -> argument
@@ -62,6 +64,12 @@ WollokVMMethodActivation >> method [
 	^ method
 ]
 
+{ #category : #protected }
+WollokVMMethodActivation >> readOwnVariableNamed: aName [
+	^ (arguments union: localVariables) at: aName
+	
+]
+
 { #category : #accesing }
 WollokVMMethodActivation >> receiver [
 	^ receiver
@@ -69,10 +77,17 @@ WollokVMMethodActivation >> receiver [
 
 { #category : #'as yet unclassified' }
 WollokVMMethodActivation >> resolve: anIdentifier ifNotBound: aBlock [
-	^ (receiver instanceVariables union: (arguments union: localVariables)) at: anIdentifier ifAbsent: aBlock
+
+	^ (arguments union: localVariables) at: anIdentifier ifAbsent: aBlock
 ]
 
 { #category : #'as yet unclassified' }
 WollokVMMethodActivation >> return: aWollokObject [ 
 	returnClosure value: aWollokObject
+]
+
+{ #category : #protected }
+WollokVMMethodActivation >> writeOwnVariableNamed: aName value: aValue [
+	localVariables at: aName put: aValue
+	
 ]
