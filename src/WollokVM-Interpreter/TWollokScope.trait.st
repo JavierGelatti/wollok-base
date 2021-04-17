@@ -1,8 +1,5 @@
 Trait {
 	#name : #TWollokScope,
-	#instVars : [
-		'parentScope'
-	],
 	#category : #'WollokVM-Interpreter'
 }
 
@@ -14,6 +11,12 @@ TWollokScope >> declareVariableNamed: aName value: aValue [
 
 { #category : #protected }
 TWollokScope >> hasOwnDefinitionFor: aName [
+	^ self explicitRequirement
+	
+]
+
+{ #category : #accessing }
+TWollokScope >> parentScope [
 	^ self explicitRequirement
 	
 ]
@@ -35,7 +38,7 @@ TWollokScope >> scopeWithBindingFor: aName [
 	^ (self hasOwnDefinitionFor: aName)
 		ifTrue: [ self ]
 		ifFalse: [
-			parentScope ifNil: [ self flag: #todo ] ifNotNil: [ parentScope scopeWithBindingFor: aName ]
+			self parentScope ifNil: [ self flag: #todo ] ifNotNil: [ self parentScope scopeWithBindingFor: aName ]
 		]
 	
 ]

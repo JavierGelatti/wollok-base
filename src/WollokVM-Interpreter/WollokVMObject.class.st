@@ -59,7 +59,12 @@ WollokVMObject >> instanceVariablesValues [
 	^ #()
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
+WollokVMObject >> parentScope [
+	^ parentScope
+]
+
+{ #category : #accessing }
 WollokVMObject >> parentScope: aScope [ 
 	parentScope := aScope
 ]

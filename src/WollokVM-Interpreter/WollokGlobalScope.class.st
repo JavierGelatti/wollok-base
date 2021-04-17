@@ -20,6 +20,11 @@ WollokGlobalScope >> initialize [
 	bindings := Dictionary new
 ]
 
+{ #category : #accessing }
+WollokGlobalScope >> parentScope [
+	^ nil
+]
+
 { #category : #protected }
 WollokGlobalScope >> readOwnVariableNamed: aName [
 	^ bindings at: aName

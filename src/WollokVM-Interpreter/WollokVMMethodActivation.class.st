@@ -27,14 +27,7 @@ WollokVMMethodActivation class >> newFor: aWollokMethod comingFrom: aWollokClass
 		yourself.
 ]
 
-{ #category : #'as yet unclassified' }
-WollokVMMethodActivation >> at: aVariableName put: aWollokObject ifNotBound: aBlock [
-	(localVariables includesKey: aVariableName) ifTrue: [
-		localVariables at: aVariableName put: aWollokObject 
-	] ifFalse: aBlock
-]
-
-{ #category : #accesing }
+{ #category : #accessing }
 WollokVMMethodActivation >> currentClass [
 	^ class
 ]
@@ -59,9 +52,14 @@ WollokVMMethodActivation >> initializeWithMethod: aWollokMethod currentClass: aW
 	]) asDictionary.
 ]
 
-{ #category : #accesing }
+{ #category : #accessing }
 WollokVMMethodActivation >> method [
 	^ method
+]
+
+{ #category : #accessing }
+WollokVMMethodActivation >> parentScope [
+	^ parentScope
 ]
 
 { #category : #protected }
@@ -70,15 +68,9 @@ WollokVMMethodActivation >> readOwnVariableNamed: aName [
 	
 ]
 
-{ #category : #accesing }
+{ #category : #accessing }
 WollokVMMethodActivation >> receiver [
 	^ receiver
-]
-
-{ #category : #'as yet unclassified' }
-WollokVMMethodActivation >> resolve: anIdentifier ifNotBound: aBlock [
-
-	^ (arguments union: localVariables) at: anIdentifier ifAbsent: aBlock
 ]
 
 { #category : #'as yet unclassified' }
