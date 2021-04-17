@@ -5,19 +5,6 @@ Class {
 }
 
 { #category : #tests }
-WollokVMExceptionTest >> testAllObjectsUnderstandErrorMessage [
-
-	[self interpretExpression: 'true.error("ahhhh me muero")'] 
-		on: WollokError 
-		do: [ :e |
-			self assert: e wollokException isNotNil.
-			^ self
-		].
-		
-	self fail
-]
-
-{ #category : #tests }
 WollokVMExceptionTest >> testFinallyExecutesWithException [
 
 	| returnObject |
@@ -26,7 +13,7 @@ class MyFaillingClass {
 	var a = 7
 	
 	method boom(){
-		self.error("Boom!")
+		throw new Exception(message = "Boom!")
 	}
 	
 	method noboom() {  }
@@ -52,7 +39,7 @@ class MyFaillingClass {
 	var a = 7
 	
 	method boom(){
-		self.error("Boom!")
+		throw new Exception(message = "Boom!")
 	}
 	
 	method noboom() {  }
@@ -77,7 +64,7 @@ class MyFaillingClass {
 	var a = 7
 	
 	method boom(){
-		self.error("Boom!")
+		throw new Exception(message = "Boom!")
 	}
 }'.
 
@@ -100,7 +87,7 @@ class MyFaillingClass {
 	var a = 7
 	
 	method boom(){
-		self.error("Boom!")
+		throw new Exception(message = "Boom!")
 	}
 }'.
 
@@ -115,7 +102,7 @@ class MyFaillingClass {
 { #category : #tests }
 WollokVMExceptionTest >> testWollokExceptionReachingEndOfStackPopsAsAWollokError [
 
-	[self interpretExpression: 'throw new Exception("ahhhh me muero")'] 
+	[self interpretExpression: 'throw new Exception(message = "ahhhh me muero")'] 
 		on: WollokError 
 		do: [ :e |
 			self assert: e wollokException isNotNil.
