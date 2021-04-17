@@ -154,11 +154,16 @@ WollokASTInterpreter >> visitBooleanLiteral: aBooleanLiteralNode [
   ^ self wollokBooleanFrom: aBooleanLiteralNode booleanValue
 ]
 
+{ #category : #'as yet unclassified' }
+WollokASTInterpreter >> visitClosure: aClosureNode [ 
+	^ self interpretExpression: aClosureNode expression.
+]
+
 { #category : #visiting }
 WollokASTInterpreter >> visitConstructorCall: aConstructorCallNode [
    | className class instanceVariables newObject |
 
-	className := aConstructorCallNode classRef identifiers first value.
+	className := aConstructorCallNode classRef identifiersAsString.
 	class := self resolve: className.
 	instanceVariables := 	class instanceVariablesForNewObjectInContext: self.
 		
@@ -196,6 +201,11 @@ WollokASTInterpreter >> visitMemberFeatureCall: aMemberFeatureCallNode [
 	^ self send: (featureName, '/' , arguments size asString) asSymbol to: receiver with: arguments.
 ]
 
+{ #category : #'as yet unclassified' }
+WollokASTInterpreter >> visitNullLiteral: aNullLiteralNode [ 
+	^ self wollokNull.
+]
+
 { #category : #visiting }
 WollokASTInterpreter >> visitNumberLiteral: aWollokNumberLiteralNode [ 
 
@@ -228,6 +238,36 @@ WollokASTInterpreter >> visitSuperInvocation: aSuperInvocationNode [
 	arguments := aSuperInvocationNode arguments collect: [ :argument | argument acceptVisitor: self ].
 
 	^ self send: self currentMethod selector to: self currentReceiver with: arguments startingLookupFrom: self currentClass superclass.
+]
+
+{ #category : #'as yet unclassified' }
+WollokASTInterpreter >> visitThrow: aThrowNode [ 
+	| anExceptionToThrow |
+	anExceptionToThrow := self interpretExpression: aThrowNode exception.
+	
+	(WollokError new wollokException: anExceptionToThrow) signal.
+]
+
+{ #category : #'as yet unclassified' }
+WollokASTInterpreter >> visitTry: aTryNode [ 
+	| expressionToTry |
+	expressionToTry := aTryNode expression.
+	
+	[ |result|
+		result := self interpretExpression: expressionToTry.
+		aTryNode alwaysExpression ifNotNil: [ 
+			self interpretExpression: aTryNode alwaysExpression.
+		].
+		^ result.
+	] on: WollokError do: [:aWollokError | | catchBlock catchResult |
+		catchBlock := aTryNode catchBlocks detect: [:aCatchBlock |
+			aWollokError wollokException wollokClass isIdentifiedBy: aCatchBlock exceptionType.
+		].
+		
+		catchResult := self interpretExpression: catchBlock expression.
+		self interpretExpression: aTryNode alwaysExpression.
+		^ catchResult.
+	]
 ]
 
 { #category : #visiting }

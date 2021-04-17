@@ -70,6 +70,11 @@ WollokVMClass >> interpret: expressionForInitialValue using: aWollokASTInterpret
 ]
 
 { #category : #'as yet unclassified' }
+WollokVMClass >> isIdentifiedBy: aQualifiedNameNode [ 
+	^ name = aQualifiedNameNode identifiersAsString.
+]
+
+{ #category : #'as yet unclassified' }
 WollokVMClass >> mergeMethods: anotherMethodDictionary [
 	methodDictionary := methodDictionary union: anotherMethodDictionary.
 ]

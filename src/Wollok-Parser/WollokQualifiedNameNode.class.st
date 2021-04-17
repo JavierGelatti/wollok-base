@@ -34,6 +34,11 @@ WollokQualifiedNameNode >> identifiers: anOrderedCollection [
 	identifiers := anOrderedCollection
 ]
 
+{ #category : #generated }
+WollokQualifiedNameNode >> identifiersAsString [
+	^ $. join: (identifiers collect: #value).
+]
+
 { #category : #'generated-initialize-release' }
 WollokQualifiedNameNode >> initialize [
 	super initialize.

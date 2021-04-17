@@ -89,6 +89,11 @@ WollokVMObject >> readOwnVariableNamed: aName [
 	
 ]
 
+{ #category : #'as yet unclassified' }
+WollokVMObject >> valueCollection [
+	^ instanceVariables associations.
+]
+
 { #category : #accessing }
 WollokVMObject >> wollokClass [
 	^ wollokClass
